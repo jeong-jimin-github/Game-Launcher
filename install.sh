@@ -1,4 +1,4 @@
-call .venv/Scripts/activate.bat
+source ./.venv/bin/activate
 
 pip install eel
 pip install pywebview

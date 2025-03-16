@@ -1,9 +1,12 @@
 import os
 import getpass
 import shutil
+import platform
 
 username = getpass.getuser()
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
+if platform.platform() != "Windows":
+    unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 def unzip(path):
     try:

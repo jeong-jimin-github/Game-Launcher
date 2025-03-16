@@ -8,9 +8,14 @@ import os
 import webview
 import subprocess
 import webbrowser
+import platform
 
 username = getpass.getuser()
+
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
+
+if platform.platform() != "Windows":
+    unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 downloaded = False
 if(os.path.exists(unzippath)):
@@ -48,6 +53,26 @@ def check_for_exe_files(folder_path):
         # UnityCrashHandler64.exe 이외의 exe 파일 찾기
         for file in files:
             if file.endswith('.exe') and file != 'UnityCrashHandler64.exe':
+                print(f"Found other .exe file: {file}")
+                return file
+        
+        print("No other .exe files found in the folder.")
+        return False
+    except FileNotFoundError:
+        print(f"The folder path '{folder_path}' does not exist.")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+    
+def check_for_mac_files(folder_path):
+    try:
+        # 폴더 안의 파일과 디렉토리 목록 가져오기
+        files = os.listdir(folder_path)
+        
+        # UnityCrashHandler64.exe 이외의 exe 파일 찾기
+        for file in files:
+            if file.endswith('.app'):
                 print(f"Found other .exe file: {file}")
                 return file
         
@@ -127,7 +152,11 @@ def play():
         eel.pyn()
         
         # 실행 가능한 EXE 파일 확인
+
         file = check_for_exe_files(unzippath)
+
+        if platform.platform() != "Windows":
+            file = check_for_mac_files(unzippath)
         if not file:
             print("No executable file found.")
             return
@@ -135,8 +164,16 @@ def play():
         print(f"Launching game: {file}")
         
         # EXE 파일 실행 및 대기
-        process = subprocess.Popen(f'"{unzippath}\\{file}"', shell=True)  # EXE 파일 실행
-        process.wait()  # 게임 프로세스가 종료될 때까지 대기
+        if platform.platform() == "Windows":
+            process = subprocess.Popen(f'"{unzippath}\\{file}"', shell=True)  # EXE 파일 실행
+        
+            process.wait()  # 게임 프로세스가 종료될 때까지 대기
+
+        else:
+            process = subprocess.call(
+        ["/usr/bin/open", "-W", "-n", "-a", f"{unzippath}/{file}"]
+        )
+
         print("Game finished.")
 
         # 게임 종료 후 pyc 호출
@@ -167,8 +204,10 @@ def dl():
         unarchiving_thread.start()
 
         eel.print("압축 푸는 중...")
-        unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
-        
+        if platform.platform() == "Windows":
+            unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
+        else:
+            unzip('./temp/SubarashiiGame-macOS.zip')  # 압축 해제 시작   
         eel.print("압축 풀기가 완료되었습니다.")
 
         unarchiving = False

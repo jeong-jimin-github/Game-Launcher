@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import subprocess
+import platform
 
 # Gogs 릴리스 URL
 GOGS_RELEASES_URL = "http://112.147.160.124:8080/Kuuhaku/Unity-Game/releases"
@@ -35,11 +36,18 @@ def fetch_latest_release():
         # 최신 릴리스 다운로드 링크 찾기 ("Windows" 텍스트 포함) - 새로운 로직
         download_list = soup.find_all("li")
         download_url = None
-        for item in download_list:
-            link = item.find("a")
-            if link and "Windows" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
-                download_url = BASE_URL + link["href"]  # 상대 경로 -> 절대 경로 변환
-                break
+        if platform.platform() == "Windows":
+            for item in download_list:
+                link = item.find("a")
+                if link and "Windows" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
+                    download_url = BASE_URL + link["href"]  # 상대 경로 -> 절대 경로 변환
+                    break
+        else:
+            for item in download_list:
+                link = item.find("a")
+                if link and "macOS" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
+                    download_url = BASE_URL + link["href"]  # 상대 경로 -> 절대 경로 변환
+                    break
 
         if not download_url:
             raise Exception("No Windows release found.")
@@ -57,10 +65,15 @@ def download():
         hide_folder_windows(DOWNLOAD_FOLDER)
     print("Download Start")
     download_url = fetch_latest_release()[1]
-    if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))):
-        os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))
-    filename = f"SubarashiiGame-Windows.zip";
-
+    if platform.platform() == "Windows":
+        if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))):
+            os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))
+        filename = f"SubarashiiGame-Windows.zip";
+    else:
+        if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-macOS.zip"))):
+            os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-macOS.zip"))
+        filename = f"SubarashiiGame-macOS.zip";
+    
     # 파일 다운로드 및 저장
     file_path = os.path.join(DOWNLOAD_FOLDER, filename)
     with requests.get(download_url, stream=True) as file_response:
