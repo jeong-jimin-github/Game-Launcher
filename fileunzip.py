@@ -2,6 +2,7 @@ import os
 import getpass
 import shutil
 import platform
+import subprocess
 
 username = getpass.getuser()
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
@@ -23,7 +24,10 @@ def unzip(path):
         os.makedirs(unzippath, exist_ok=True)
 
         # 압축 해제
-        shutil.unpack_archive(path, unzippath, 'zip')
+        if platform.platform() == "Windows":
+            shutil.unpack_archive(path, unzippath, 'zip')
+        else:
+            subprocess.run(['unzip', path, '-d', unzippath], check=True)
         print("Unzipping completed successfully.")
         shutil.rmtree("./temp")
     except FileNotFoundError as fnfe:
