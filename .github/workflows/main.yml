@@ -1,9 +1,7 @@
 name: Automated Release ⭐
 
 on:
-  push:
-    tags:
-      - v*  # v로 시작하는 태그 푸시 시 실행
+  push:  # 모든 커밋 push 이벤트 발생 시 작동
 
 permissions:
   contents: write
@@ -27,27 +25,30 @@ jobs:
           upload_exe_with_name: 'main'
           options: --onefile, --windowed, --noconsole, --add-data web:web, --icon icon.ico
 
-      # 3. 빌드된 실행 파일을 artifacts 디렉토리로 복사
+      # 3. 빌드된 실행 파일을 artifacts 디렉토리로 이동
       - name: Archive Executable
         run: |
           mkdir artifacts
           move dist\main.exe artifacts\main.exe
 
-      # 4. 릴리스를 생성하고 실행 파일 업로드
+      # 4. 자동 태그 생성 및 릴리스 생성
       - name: Create Release and Upload Executable
-        shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }} # 트리거된 태그 이름으로 설정됨
+        shell: pwsh
         run: |
-          if ($TAG -match '^v[0-9]+(\.[0-9]+)*$') {
-            gh release create $TAG `
-              --repo "$REPO" `
-              --title "Release ${TAG#v}" `
-              --notes "Automatically generated release." `
-              artifacts\main.exe
-          }
-          else {
-            Write-Error "Invalid tag name: $TAG. Expected a version tag like v1.0.0"
-          }
+          # 현재 시간 기반으로 자동 태그 생성
+          $version = (Get-Date -Format "yyyyMMdd-HHmmss")  # 형식: yyyyMMdd-HHmmss
+          $tag = "v$version"
+
+          # 자동 태그 생성
+          git tag $tag
+          git push origin $tag
+
+          # Release 만들기 및 실행 파일 업로드
+          gh release create $tag `
+            --repo "$REPO" `
+            --title "Release $version" `
+            --notes "Automatically generated release for commit: ${{ github.sha }}" `
+            artifacts\main.exe
