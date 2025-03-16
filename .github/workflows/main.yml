@@ -1,4 +1,5 @@
 name: Automated Build ⭐
+
 on:
   push:
     branches: [ main ]
@@ -6,12 +7,45 @@ on:
 jobs:
   pyinstaller-build:
     runs-on: windows-latest
+
     steps:
-      - name: Create Executable
-        uses: sayyid5416/pyinstaller@v1
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          python_ver: '3.10'
-          spec: 'main.py'
-          requirements: 'requirements.txt'
-          upload_exe_with_name: 'main'
-          options: --onefile, --windowed, --noconsole, --add-data=web:web --icon=icon.ico
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create Executable
+        uses: pyinstaller/pyinstaller-action@master
+        with:
+          path: main.py
+          options: --onefile --windowed --noconsole --add-data web:web --icon icon.ico
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/main.exe
+          asset_name: main.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+  create-release:
+    needs: pyinstaller-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
