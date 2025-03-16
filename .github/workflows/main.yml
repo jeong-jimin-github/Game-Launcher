@@ -2,6 +2,8 @@ name: Automated Release ⭐
 
 on:
   push:
+    tags:
+      - v*  # v로 시작하는 태그 푸시 시 실행
 
 permissions:
   contents: write
@@ -15,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. PyInstaller를 사용한 exe 빌드
+      # 2. PyInstaller로 실행 파일 빌드
       - name: Build Executable
         uses: sayyid5416/pyinstaller@v1
         with:
@@ -25,22 +27,27 @@ jobs:
           upload_exe_with_name: 'main'
           options: --onefile, --windowed, --noconsole, --add-data web:web, --icon icon.ico
 
-      # 3. 빌드 결과물을 artifacts에 복사
+      # 3. 빌드된 실행 파일을 artifacts 디렉토리로 복사
       - name: Archive Executable
         run: |
           mkdir artifacts
           move dist\main.exe artifacts\main.exe
 
-      # 4. GitHub Release 생성 및 업로드
+      # 4. 릴리스를 생성하고 실행 파일 업로드
       - name: Create Release and Upload Executable
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ github.ref_name }} # 트리거된 태그 이름으로 설정됨
         run: |
-          gh release create $TAG `
-            --repo "$REPO" `
-            --title "Release ${TAG#v}" `
-            --notes "Automatically generated release." `
-            artifacts\main.exe
+          if ($TAG -match '^v[0-9]+(\.[0-9]+)*$') {
+            gh release create $TAG `
+              --repo "$REPO" `
+              --title "Release ${TAG#v}" `
+              --notes "Automatically generated release." `
+              artifacts\main.exe
+          }
+          else {
+            Write-Error "Invalid tag name: $TAG. Expected a version tag like v1.0.0"
+          }
