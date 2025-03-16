@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Viewport 기본 설정 */
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #fdfdfd; /* 흰 배경 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+      }
+
+      .planet-of-lana {
+        position: relative;
+        width: 1728px; /* 디자인 가로 크기 */
+        height: 1117px; /* 디자인 세로 크기 */
+        transform-origin: top left; /* 스케일 조정을 기준점으로 고정 */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pywebview-drag-region"></div>
+    <div class="planet-of-lana">
+      <div class="overlap-wrapper">
+        <div class="overlap">
+          <img class="image" src="img/image-4.png" />
+          <div class="rectangle"></div>
+          <div class="kuuhaku-games">Kuuhaku<br />Games</div>
+          <img class="button" onclick="exit()" src="img/button.png" />
+          <img class="line" src="img/line.png" />
+          <img class="img" src="img/line.png" />
+          <button class="div">
+            <div class="text-wrapper">Home</div>
+            <img class="image-2" src="img/image.png" />
+          </button>
+          <img class="rectangle-2" src="img/rectangle.png" />
+          <button class="button-2" onclick="discord()">
+            <img class="image-2" src="img/image-2.png" />
+            <div class="text-wrapper-2">디스코드 서버</div>
+          </button>
+          <div class="rectangle-i"></div>
+          <p class="info" id="info"></p>
+          <button class="div-wrapper" onclick="dl()">
+            <div class="overlap-2">
+              <div class="rectangle-3" id="btbg"></div>
+              <div class="text-wrapper-3" id="bttext">다운로드</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="/eel.js"></script>
+    <script>
+      let downloading = false;
+      let downloaded = false;
+      let playing = false;
+
+      eel.expose(print);
+      function print(message) {
+        document.getElementById("info").innerHTML = message;
+        console.log("JS print() called with message:", message);
+      }
+
+      async function exit() {
+        await eel.pexit(); // Python 함수 호출
+      }
+      eel.expose(pyn);
+      playing = true;
+      function pyn() {
+      document.getElementById("bttext").innerHTML = "플레이 중";
+      document.getElementById("btbg").style.backgroundColor = "gray";
+    }
+
+    eel.expose(pyc);
+      playing = false;
+      function pyc() {
+        document.getElementById("bttext").innerHTML = "플레이";
+        document.getElementById("btbg").style.backgroundColor = "#ffcc00";
+    }
+
+      eel.expose(dlcomp);
+      function dlcomp() {
+        downloading = false;
+        downloaded = true;
+        document.getElementById("bttext").innerHTML = "플레이";
+        document.getElementById("btbg").style.backgroundColor = "#ffcc00";
+      }
+
+      async function dl() {
+        if (!downloaded) {
+          if (!downloading) {
+            try {
+              downloading = true;
+              document.getElementById("bttext").innerHTML = "대기중";
+              document.getElementById("btbg").style.backgroundColor = "gray";
+              await eel.dl(); // Python 함수 호출
+              console.log("Python's dl function has been called successfully!");
+            } catch (error) {
+              console.error("Error while calling Python function:", error);
+            }
+          }
+        } else {
+          if(!playing){
+          await eel.play();}
+        }
+      }
+
+      async function discord() {
+        eel.contact();
+      }
+
+      // 화면 크기에 맞게 레이아웃을 조정합니다.
+      function resize() {
+        const container = document.querySelector(".planet-of-lana");
+
+        // 기준 해상도
+        const baseWidth = 1728;
+        const baseHeight = 1117;
+
+        // 현재 화면 크기와 기준 해상도를 비교해 스케일 계산
+        const scaleX = window.innerWidth / baseWidth;
+        const scaleY = window.innerHeight / baseHeight;
+
+        // 전체 콘텐츠 비율 유지를 위해 최소 배율 사용
+        const scale = Math.min(scaleX, scaleY);
+
+        // 스케일 적용
+        container.style.transform = `scale(${scale})`;
+
+        // 부모 요소의 크기를 통해 가운데 정렬 보정
+        const offsetX = (window.innerWidth - baseWidth * scale) / 2;
+        const offsetY = (window.innerHeight - baseHeight * scale) / 2;
+
+        container.style.position = "absolute";
+        container.style.left = `${offsetX}px`;
+        container.style.top = `${offsetY}px`;
+      }
+
+      // 창 크기 변경 시 이벤트 처리
+      window.addEventListener("resize", resize);
+      resize(); // 초기 실행
+
+      eel.dlcheck();
+    </script>
+  </body>
+</html>

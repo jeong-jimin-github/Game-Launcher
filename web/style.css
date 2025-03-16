@@ -1,0 +1,229 @@
+.planet-of-lana {
+    background-color: #fdfdfd;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .info {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break:break-all;
+    position: absolute;
+    width: 745px;
+    top: 960px;
+    left: 500px;
+    font-family: "Poppins", "Noto Sans KR";
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 36px;
+    text-align: left;
+    letter-spacing: 0;
+    line-height: normal;
+    white-space: nowrap;
+  }
+
+  .rectangle-i {
+    position: absolute;
+    width: 770px;
+    height: 65px;
+    top: 956px;
+    left: 480px;
+    background-color: #000000;
+    border-radius: 5px;
+    backdrop-filter: blur(30px) brightness(100%);
+    -webkit-backdrop-filter: blur(30px) brightness(100%);
+    opacity: 0.5;
+  }
+  
+  .planet-of-lana .overlap-wrapper {
+    background-color: #fdfdfd;
+    overflow: hidden;
+    width: 1728px;
+    height: 1117px;
+  }
+  
+  .planet-of-lana .overlap {
+    position: relative;
+    width: 1770px;
+    height: 1117px;
+    left: -42px;
+  }
+  
+  .planet-of-lana .image {
+    position: absolute;
+    width: 1728px;
+    height: 1117px;
+    top: 0;
+    left: 42px;
+    object-fit: cover;
+  }
+  
+  .planet-of-lana .rectangle {
+    position: absolute;
+    width: 416px;
+    height: 1117px;
+    top: 0;
+    left: 0;
+    background-color: #000000;
+    opacity: 0.3;
+  }
+  
+  .planet-of-lana .kuuhaku-games {
+    position: absolute;
+    top: 40px;
+    left: 123px;
+    font-family: "Poppins", "Noto Sans KR";
+    font-weight: 700;
+    color: #fdfdfd;
+    font-size: 40px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: normal;
+  }
+
+  .planet-of-lana .button {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    top: 30px;
+    left: 1670px;
+    object-fit: cover;
+}
+  
+  .planet-of-lana .line {
+    position: absolute;
+    width: 270px;
+    height: 1px;
+    top: 173px;
+    left: 88px;
+    object-fit: cover;
+  }
+  
+  .planet-of-lana .img {
+    position: absolute;
+    width: 270px;
+    height: 1px;
+    top: 253px;
+    left: 88px;
+    object-fit: cover;
+  }
+  
+  .planet-of-lana .div {
+    all: unset;
+    box-sizing: border-box;
+    position: absolute;
+    width: 115px;
+    height: 30px;
+    top: 198px;
+    left: 93px;
+  }
+  
+  .planet-of-lana .text-wrapper {
+    position: absolute;
+    top: -3px;
+    left: 41px;
+    font-family: "Poppins", "Noto Sans KR";
+    font-weight: 500;
+    color: #fdfdfd;
+    font-size: 24px;
+    letter-spacing: 0;
+    line-height: normal;
+    white-space: nowrap;
+  }
+  
+  .planet-of-lana .rectangle-2 {
+    position: absolute;
+    width: 1252px;
+    height: 580px;
+    top: 112px;
+    left: 468px;
+  }
+  
+  .planet-of-lana .overlap-group {
+    position: relative;
+    height: 30px;
+  }
+  
+  .planet-of-lana .button-2 {
+    all: unset;
+    box-sizing: border-box;
+    position: absolute;
+    width: 143px;
+    height: 30px;
+    top: 1036px;
+    left: 93px;
+  }
+  
+  .planet-of-lana .text-wrapper-2 {
+    position: absolute;
+    height: 17px;
+    top: -4px;
+    left: 43px;
+    opacity: 0.7;
+    font-family: "Poppins", "Noto Sans KR";
+    font-weight: 500;
+    color: #fdfdfd;
+    font-size: 24px;
+    letter-spacing: 0;
+    line-height: normal;
+    white-space: nowrap;
+  }
+  
+  .planet-of-lana .div-wrapper {
+    all: unset;
+    box-sizing: border-box;
+    position: absolute;
+    width: 356px;
+    height: 93px;
+    top: 943px;
+    left: 1311px;
+  }
+  
+  .planet-of-lana .overlap-2 {
+    position: relative;
+    width: 354px;
+    height: 93px;
+    border-radius: 5px;
+  }
+  
+  .planet-of-lana .rectangle-3 {
+    position: absolute;
+    width: 354px;
+    height: 93px;
+    top: 0;
+    left: 0;
+    background-color: #ffcc00;
+    border-radius: 5px;
+    backdrop-filter: blur(30px) brightness(100%);
+    -webkit-backdrop-filter: blur(30px) brightness(100%);
+    opacity: 0.5;
+  }
+  
+  .planet-of-lana .text-wrapper-3 {
+    position: absolute;
+    width: 260px;
+    height: 32px;
+    top: 20px;
+    left: 47px;
+    font-family: "Poppins", "Noto Sans KR";
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 36px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: normal;
+    white-space: nowrap;
+  }
+
+  .pywebview-drag-region {
+    height: 50px;
+    background-color: transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 94%;
+    z-index: 1000; /* 드래그 영역을 대부분의 요소보다 상위에 */
+}
