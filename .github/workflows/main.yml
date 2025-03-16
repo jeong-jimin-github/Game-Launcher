@@ -25,22 +25,22 @@ jobs:
           upload_exe_with_name: 'main'
           options: --onefile, --windowed, --noconsole, --add-data web:web, --icon icon.ico
 
-      # 3. 빌드된 실행 파일 저장
+      # 3. 빌드 결과물을 artifacts에 복사
       - name: Archive Executable
         run: |
           mkdir artifacts
-          mv dist/main.exe artifacts/
-        shell: bash
+          move dist\main.exe artifacts\main.exe
 
-      # 4. 릴리스 생성 및 실행 파일 업로드
-      - name: Create Release
+      # 4. GitHub Release 생성 및 업로드
+      - name: Create Release and Upload Executable
+        shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" \
-              --repo="$REPO" \
-              --title="Release ${TAG#v}" \
-              --notes "Automatically generated release." \
-              ./artifacts/main.exe
+          gh release create $TAG `
+            --repo "$REPO" `
+            --title "Release ${TAG#v}" `
+            --notes "Automatically generated release." `
+            artifacts\main.exe
