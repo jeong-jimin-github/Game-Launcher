@@ -5,6 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
+/temp/
+/SubarashiiGame/
+.DS_Store
 
 # Distribution / packaging
 bin/
