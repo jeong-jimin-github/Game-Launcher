@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import subprocess
-import platform
+import platformcheck
 
 # Gogs 릴리스 URL
 GOGS_RELEASES_URL = "http://112.147.160.124:8080/Kuuhaku/Unity-Game/releases"
@@ -36,7 +36,7 @@ def fetch_latest_release():
         # 최신 릴리스 다운로드 링크 찾기 ("Windows" 텍스트 포함) - 새로운 로직
         download_list = soup.find_all("li")
         download_url = None
-        if platform.platform() == "Windows":
+        if platformcheck.os() == "Windows":
             for item in download_list:
                 link = item.find("a")
                 if link and "Windows" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
@@ -65,7 +65,9 @@ def download():
         hide_folder_windows(DOWNLOAD_FOLDER)
     print("Download Start")
     download_url = fetch_latest_release()[1]
-    if platform.platform() == "Windows":
+
+    filename = f"";
+    if platformcheck.os() == "Windows":
         if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))):
             os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))
         filename = f"SubarashiiGame-Windows.zip";

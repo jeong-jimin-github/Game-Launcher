@@ -8,15 +8,25 @@ import os
 import webview
 import subprocess
 import webbrowser
-import platform
+import platformcheck
+
+if platformcheck.os() == "Windows":
+    print("Your OS: Windows")
+
+elif platformcheck.os() == "macOS":
+    print("Your OS: macOS")
+
+else:
+    print("Your OS is not support!")
+    exit()
 
 username = getpass.getuser()
-
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
 
-if platform.platform() != "Windows":
+if platformcheck.os() != "Windows":
     unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
+print(unzippath)
 downloaded = False
 if(os.path.exists(unzippath)):
     downloaded = True
@@ -161,7 +171,7 @@ def play():
 
         file = check_for_exe_files(unzippath)
 
-        if platform.platform() != "Windows":
+        if platformcheck.os() != "Windows":
             file = check_for_mac_files(unzippath)
         if not file:
             print("No executable file found.")
@@ -170,7 +180,7 @@ def play():
         print(f"Launching game: {file}")
         
         # EXE 파일 실행 및 대기
-        if platform.platform() == "Windows":
+        if platformcheck.os() == "Windows":
             process = subprocess.Popen(f'"{unzippath}\\{file}"', shell=True)  # EXE 파일 실행
         
             process.wait()  # 게임 프로세스가 종료될 때까지 대기
@@ -210,7 +220,7 @@ def dl():
         unarchiving_thread.start()
 
         eel.print("압축 푸는 중...")
-        if platform.platform() == "Windows":
+        if platformcheck.os() == "Windows":
             unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
         else:
             unzip('./temp/SubarashiiGame-macOS.zip')  # 압축 해제 시작   

@@ -1,12 +1,12 @@
 import os
 import getpass
 import shutil
-import platform
+import platformcheck
 import subprocess
 
 username = getpass.getuser()
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
-if platform.platform() != "Windows":
+if platformcheck.os() != "Windows":
     unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 def unzip(path):
@@ -24,7 +24,7 @@ def unzip(path):
         os.makedirs(unzippath, exist_ok=True)
 
         # 압축 해제
-        if platform.platform() == "Windows":
+        if platformcheck.os() == "Windows":
             shutil.unpack_archive(path, unzippath, 'zip')
         else:
             subprocess.run(['unzip', path, '-d', unzippath], check=True)
