@@ -30,31 +30,31 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. OS별 빌드 (Windows와 macOS 빌드 분리)
+      # 4. OS별 빌드 (Windows와 macOS 빌드 분리, UPX 포함)
       - name: Build Executable with PyInstaller
         run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          if (${RUNNER_OS} -eq "Windows") {
             pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
-          else
+          } else {
             pyinstaller --onefile --windowed --noconsole --add-data web:web main.py
-          fi
+          }
 
       # 5. 빌드 결과를 artifacts 디렉터리에 복사
       - name: Archive Executable
         run: |
           mkdir artifacts
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          if (${RUNNER_OS} -eq "Windows") {
             mv dist\main.exe artifacts\main.exe
-          else
+          } else {
             mv dist/main artifacts/main-macos
-          fi
+          }
 
       # 6. 자동 태그 생성 및 릴리스 생성
       - name: Create Release and Upload Executable
+        shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-        shell: pwsh
         run: |
           # 현재 시간 기반으로 자동 태그 생성
           $version = (Get-Date -Format "yyyyMMdd-HHmmss")  # 형식: yyyyMMdd-HHmmss
