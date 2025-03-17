@@ -9,10 +9,10 @@ permissions:
 jobs:
   build-and-release:
     name: Build and Release Executable
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, macos-latest]  # Windows와 macOS에서 빌드 실행
-    runs-on: ${{ matrix.os }}
     steps:
       # 1. 코드 체크아웃
       - name: Checkout repository
@@ -30,22 +30,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. PyInstaller로 실행 파일 빌드
-      - name: Build Executable with PyInstaller
+      # 4. PyInstaller로 실행 파일 빌드 (OS 구분)
+      - name: Build Executable
+        shell: bash  # 모든 OS에서 실행 가능하도록 Bash로 지정
         run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          echo "Running on $RUNNER_OS"
+          if [ "$RUNNER_OS" = "Windows" ]; then
             pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
-          else
+          elif [ "$RUNNER_OS" = "macOS" ]; then
             pyinstaller --onefile --windowed --noconsole --add-data web:web --upx-dir upx main.py
           fi
 
-      # 5. 빌드 결과를 artifacts 디렉터리에 복사
+      # 5. 빌드 결과를 artifacts 디렉터리에 복사 (OS 구분)
       - name: Archive Executable
+        shell: bash  # 명령어 일관성을 위해 Bash 지정
         run: |
-          mkdir artifacts
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          mkdir -p artifacts
+          if [ "$RUNNER_OS" = "Windows" ]; then
             mv dist/main.exe artifacts/main-windows.exe
-          else
+          elif [ "$RUNNER_OS" = "macOS" ]; then
             mv dist/main artifacts/main-macos
           fi
 
@@ -53,8 +56,9 @@ jobs:
       - name: Create Release and Upload Executable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
-          # 현재 시간 기반으로 태그 생성
+          # 현재 시간 기반 태그 생성
           version=$(date +%Y%m%d-%H%M%S)  # 형식: yyyyMMdd-HHmmss
           tag="v$version"
 
@@ -63,12 +67,12 @@ jobs:
           git push origin $tag
 
           # Release 생성
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          if [ "$RUNNER_OS" = "Windows" ]; then
             gh release create "$tag" \
               --title "Windows Release: $version" \
               --notes "Automatically generated release for Windows." \
               artifacts/main-windows.exe
-          else
+          elif [ "$RUNNER_OS" = "macOS" ]; then
             gh release create "$tag" \
               --title "MacOS Release: $version" \
               --notes "Automatically generated release for MacOS." \
