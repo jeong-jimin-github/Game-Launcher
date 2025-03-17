@@ -1,7 +1,7 @@
-name: Automated Release ⭐
+name: Automated Release with UPX ⭐
 
 on:
-  push:  # 모든 커밋 push 이벤트 발생 시 작동
+  push:  # 모든 Push 이벤트에서 실행
 
 permissions:
   contents: write
@@ -9,46 +9,72 @@ permissions:
 jobs:
   build-and-release:
     name: Build and Release Executable
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]  # Windows와 macOS에서 빌드 실행
     steps:
       # 1. 코드 체크아웃
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. PyInstaller로 실행 파일 빌드
-      - name: Build Executable
-        uses: sayyid5416/pyinstaller@v1
+      # 2. Python 환경 설정
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python_ver: '3.10'
-          spec: 'main.py'
-          requirements: 'requirements.txt'
-          upload_exe_with_name: 'main'
-          options: --onefile, --windowed, --noconsole, --add-data web:web, --icon icon.ico
+          python-version: '3.10'
 
-      # 3. 빌드된 실행 파일을 artifacts 디렉토리로 이동
-      - name: Archive Executable
+      # 3. 의존성 설치
+      - name: Install Dependencies
         run: |
-          mkdir artifacts
-          move dist\main.exe artifacts\main.exe
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # 4. 자동 태그 생성 및 릴리스 생성
+      # 4. PyInstaller로 실행 파일 빌드 (OS 구분)
+      - name: Build Executable
+        shell: bash  # 모든 OS에서 실행 가능하도록 Bash로 지정
+        run: |
+          echo "Running on $RUNNER_OS"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            pyinstaller --onefile --windowed --noconsole --add-data web:web --upx-dir upx main.py
+          fi
+
+      # 5. 빌드 결과를 artifacts 디렉터리에 복사 (OS 구분)
+      - name: Archive Executable
+        shell: bash  # 명령어 일관성을 위해 Bash 지정
+        run: |
+          mkdir -p artifacts
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            mv dist/main.exe artifacts/main-windows.exe
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            mv dist/main artifacts/main-macos
+          fi
+
+      # 6. 자동 태그 생성 및 릴리스 생성
       - name: Create Release and Upload Executable
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-        shell: pwsh
+        shell: bash
         run: |
-          # 현재 시간 기반으로 자동 태그 생성
-          $version = (Get-Date -Format "yyyyMMdd-HHmmss")  # 형식: yyyyMMdd-HHmmss
-          $tag = "v$version"
+          # 현재 시간 기반 태그 생성
+          version=$(date +%Y%m%d-%H%M%S)  # 형식: yyyyMMdd-HHmmss
+          tag="v$version"
 
-          # 자동 태그 생성
+          # 태그 푸시
           git tag $tag
           git push origin $tag
 
-          # Release 만들기 및 실행 파일 업로드
-          gh release create $tag `
-            --repo "$REPO" `
-            --title "Release $version" `
-            --notes "Automatically generated release for commit: ${{ github.sha }}" `
-            artifacts\main.exe
+          # Release 생성
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            gh release create "$tag" \
+              --title "Windows Release: $version" \
+              --notes "Automatically generated release for Windows." \
+              artifacts/main-windows.exe
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            gh release create "$tag" \
+              --title "MacOS Release: $version" \
+              --notes "Automatically generated release for MacOS." \
+              artifacts/main-macos
+          fi

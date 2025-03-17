@@ -116,10 +116,16 @@ def start_gui(scaled_width, scaled_height):
 # Eel 초기화
 eel.init('web')  # 'web' 디렉토리가 제대로 확인되었는지 꼭 확인
 
-@eel.expose
-def contact():
+def open_web_browser():
+    # 웹 브라우저에서 Discord 링크 열기
     webbrowser.open_new("https://discord.gg/xMeUY8JsaR")
 
+@eel.expose
+def contact():
+    # open_web_browser 함수를 별도의 스레드에서 호출
+    browser_thread = threading.Thread(target=open_web_browser)
+    browser_thread.start()
+    
 @eel.expose
 def drag_window():
     print("drag_window called")  # 함수 호출 확인
