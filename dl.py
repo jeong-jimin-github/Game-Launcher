@@ -2,11 +2,18 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import subprocess
+import db
 import platformcheck
+import getpass
 
 # Gogs 릴리스 URL
 GOGS_RELEASES_URL = "http://112.147.160.124:8080/Kuuhaku/Unity-Game/releases"
 BASE_URL = "http://112.147.160.124:8080"  # Gogs 서버의 도메인
+username = getpass.getuser()
+
+unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
+if platformcheck.os() != "Windows":
+    unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 def hide_folder_windows(folder_path):
     subprocess.run(["attrib", "+h", folder_path], shell=True)
@@ -64,7 +71,7 @@ def download():
         os.makedirs(DOWNLOAD_FOLDER)
         hide_folder_windows(DOWNLOAD_FOLDER)
     print("Download Start")
-    download_url = fetch_latest_release()[1]
+    latest_version, download_url, latest_description = fetch_latest_release()
 
     filename = f"";
     if platformcheck.os() == "Windows":
@@ -84,7 +91,7 @@ def download():
             for chunk in file_response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-    return file_path
+    db.setversion(os.path.join(unzippath, "db.db"), latest_version)
 
 def getinfo():
     version, download_url, description = fetch_latest_release()

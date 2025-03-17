@@ -1,5 +1,5 @@
 import eel
-from dl import download
+from dl import download, getinfo
 import threading
 import time
 from fileunzip import unzip
@@ -9,6 +9,7 @@ import webview
 import subprocess
 import webbrowser
 import platformcheck
+import db
 
 if platformcheck.os() == "Windows":
     print("Your OS: Windows")
@@ -27,9 +28,12 @@ if platformcheck.os() != "Windows":
     unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 print(unzippath)
+
 downloaded = False
-if(os.path.exists(unzippath)):
-    downloaded = True
+if os.path.exists(unzippath) == False:
+    os.mkdir(unzippath)
+
+db.init(os.path.join(unzippath, "db.db"))
 
 # dl 함수를 위한 thread-safe 플래그
 downloading = True
@@ -96,6 +100,14 @@ def check_for_mac_files(folder_path):
         print(f"An error occurred: {e}")
         return False
     
+if platformcheck.os() == "Windows":
+    if check_for_exe_files(unzippath) != False:
+        downloaded = True
+
+else:
+    if check_for_mac_files(unzippath) != False:
+        downloaded = True
+
 def start_eel():
     """Eel 서버 실행"""
     try:
@@ -146,8 +158,17 @@ def drag_window():
 @eel.expose
 def dlcheck():
     if downloaded == True:
-        eel.print("「플레이」 버튼을 누르세요.")
-        eel.dlcomp()
+        print("게임 파일 찾음")
+        vs = getinfo()[0]
+        print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
+        if db.getversion(os.path.join(unzippath, "db.db")) == vs:
+            print("게임 파일 최신버전임")
+            eel.print("「플레이」 버튼을 누르세요.")
+            eel.dlcomp()
+        else:
+            print("최신 버전 발견: " + vs)
+            eel.print("업데이트가 필요합니다.")
+            eel.youp
 
 @eel.expose
 def pexit():

@@ -70,6 +70,7 @@
       let downloading = false;
       let downloaded = false;
       let playing = false;
+      let youpdate = false;
 
       eel.expose(print);
       function print(message) {
@@ -102,6 +103,13 @@
         document.getElementById("btbg").style.backgroundColor = "#ffcc00";
       }
 
+      eel.expose(youp);
+      function youp() {
+        youpdate = true;
+        document.getElementById("bttext").innerHTML = "업데이트";
+        document.getElementById("btbg").style.backgroundColor = "#ffcc00";
+      }
+
       async function dl() {
         if (!downloaded) {
           if (!downloading) {
@@ -117,7 +125,12 @@
           }
         } else {
           if(!playing){
+            if(!youpdate){
           await eel.play();}
+            }
+            else{
+              await eel.dl(); // Python 함수 호출
+            }
         }
       }
 
