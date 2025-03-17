@@ -1,4 +1,4 @@
-name: Automated Release ⭐
+name: Automated Release with UPX ⭐
 
 on:
   push:  # 모든 Push 이벤트에서 실행
@@ -18,11 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Python 환경 설정 (MacOS/Windows 공통)
+      # 2. Python 환경 설정
       - name: Set up Python
-        uses: actions/setup-python@v4  # Python을 설정
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Python 버전
+          python-version: '3.10'
 
       # 3. 의존성 설치
       - name: Install Dependencies
@@ -30,51 +30,47 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. OS별 빌드 (Windows와 macOS 빌드 분리, UPX 포함)
+      # 4. PyInstaller로 실행 파일 빌드
       - name: Build Executable with PyInstaller
         run: |
-          if (${RUNNER_OS} -eq "Windows") {
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
             pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
-          } else {
-            pyinstaller --onefile --windowed --noconsole --add-data web:web main.py
-          }
+          else
+            pyinstaller --onefile --windowed --noconsole --add-data web:web --upx-dir upx main.py
+          fi
 
       # 5. 빌드 결과를 artifacts 디렉터리에 복사
       - name: Archive Executable
         run: |
           mkdir artifacts
-          if (${RUNNER_OS} -eq "Windows") {
-            mv dist\main.exe artifacts\main.exe
-          } else {
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            mv dist/main.exe artifacts/main-windows.exe
+          else
             mv dist/main artifacts/main-macos
-          }
+          fi
 
       # 6. 자동 태그 생성 및 릴리스 생성
       - name: Create Release and Upload Executable
-        shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
-          # 현재 시간 기반으로 자동 태그 생성
-          $version = (Get-Date -Format "yyyyMMdd-HHmmss")  # 형식: yyyyMMdd-HHmmss
-          $tag = "v$version"
+          # 현재 시간 기반으로 태그 생성
+          version=$(date +%Y%m%d-%H%M%S)  # 형식: yyyyMMdd-HHmmss
+          tag="v$version"
 
-          # 자동 태그 생성
+          # 태그 푸시
           git tag $tag
           git push origin $tag
 
-          # Release 만들기 및 실행 파일 업로드
-          if ($env:RUNNER_OS -eq "Windows") {
-            gh release create $tag `
-              --repo "$REPO" `
-              --title "Windows Release: $version" `
-              --notes "Automatically generated Windows release for commit: ${{ github.sha }}" `
-              artifacts\main.exe
-          } else {
-            gh release create $tag `
-              --repo "$REPO" `
-              --title "MacOS Release: $version" `
-              --notes "Automatically generated MacOS release for commit: ${{ github.sha }}" `
+          # Release 생성
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            gh release create "$tag" \
+              --title "Windows Release: $version" \
+              --notes "Automatically generated release for Windows." \
+              artifacts/main-windows.exe
+          else
+            gh release create "$tag" \
+              --title "MacOS Release: $version" \
+              --notes "Automatically generated release for MacOS." \
               artifacts/main-macos
-          }
+          fi
