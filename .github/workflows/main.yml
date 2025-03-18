@@ -11,7 +11,6 @@ jobs:
     name: Windows 빌드
     runs-on: windows-latest
     steps:
-      # 1. 코드 체크아웃
       - name: 레포지토리 체크아웃
         uses: actions/checkout@v4
 
@@ -21,23 +20,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      # 3. 의존성 설치
       - name: 라이브러리 설치
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. PyInstaller로 실행 파일 빌드
       - name: 실행 파일 빌드
         shell: bash
         run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
 
-      # 5. 빌드 결과를 artifacts 디렉터리에 이동동
       - name: 실행 파일 이동
         shell: bash
-        run: mv ./dist/main.exe artifacts/main-windows.exe
+        run: |
+          mkdir artifacts
+          mv dist/main.exe artifacts/main-windows.exe
 
-      # 6. Artifacts 업로드
       - name: 첨부파일 업로드
         uses: actions/upload-artifact@v4
         with:
@@ -45,57 +42,52 @@ jobs:
           path: artifacts/main-windows.exe
 
   macOS-Build:
-    name: macOS Build
+    name: macOS 빌드
     runs-on: macos-latest
     steps:
-      # 1. 코드 체크아웃
       - name: 레포지토리 체크아웃
         uses: actions/checkout@v4
 
-      # 2. Python 환경 설정
       - name: Python 환경 구축
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      # 3. 의존성 설치
       - name: 라이브러리 설치
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. PyInstaller로 실행 파일 빌드
       - name: 실행 파일 빌드
         shell: bash
         run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico main.py
 
-      # 5. 빌드 결과를 artifacts 디렉터리에 이동동 및 압축
-      - name: 실행 파일 이동 및 압축축
+      - name: 실행 파일 이동 및 압축
         shell: bash
-        run: zip -j artifacts/main-macos.zip dist/*
+        run:  |
+          mkdir artifacts
+          zip -j artifacts/main-macos.zip dist/*
 
-      # 6. 첨부파일 업로드
-      - name: Upload artifacts
+      - name: 첨부파일 업로드
         uses: actions/upload-artifact@v4
         with:
           name: macOS-build
           path: artifacts/main-macos.zip
 
-  # 릴리스 생성
   create-release:
     name: 릴리스 생성
     needs: ['Windows-Build', 'macOS-Build']
     runs-on: ubuntu-latest
     steps:
       # 첨부파일 다운로드 (Windows)
-      - name: Download Windows Artifact
+      - name: 첨부파일 다운로드 (Windows)
         uses: actions/download-artifact@v4
         with:
           name: Windows-build
           path: artifacts/windows
 
       # 첨부파일 다운로드 (macOS)
-      - name: Download macOS Artifact
+      - name: 첨부파일 다운로드 (macOS)
         uses: actions/download-artifact@v4
         with:
           name: macOS-build
