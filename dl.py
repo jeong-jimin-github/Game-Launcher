@@ -38,9 +38,11 @@ def fetch_latest_release():
                     download_url = aa['url']
                     continue
 
+        dlurl = requests.get(download_url).json()['browser_download_url']
+
         latest_version, latest_description = receive['name'], receive['body']
 
-        return latest_version, download_url, latest_description
+        return latest_version, dlurl, latest_description
     except Exception as e:
         print(f"릴리스 체크 실패: {e}")
         return None, None, None
