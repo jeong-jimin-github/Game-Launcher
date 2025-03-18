@@ -60,7 +60,7 @@ jobs:
 
       - name: 실행 파일 빌드
         shell: bash
-        run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico main.py
+        run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.icns main.py
 
       - name: 실행 파일 이동 및 압축
         shell: bash
