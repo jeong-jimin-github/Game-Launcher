@@ -78,6 +78,3 @@ def download():
 def getinfo():
     version, download_url, description = fetch_latest_release()
     return [version, download_url, description]
-
-
-print(fetch_latest_release())

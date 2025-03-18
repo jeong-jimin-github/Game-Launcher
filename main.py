@@ -12,6 +12,8 @@ import platformcheck
 import db
 import customtkinter
 
+isDebug = False
+
 customtkinter.FontManager.load_font("PretendardVariable.ttf")
 
 customtkinter.set_appearance_mode("System")
@@ -104,7 +106,6 @@ def exitalert():
         app = customtkinter.CTk()
         app.geometry("300x130")
         center_window(app)
-        hPyT.title_bar.hide(app)
         my_font = customtkinter.CTkFont(family="Pretendard Variable", size=15, weight='normal')
 
         def no():
@@ -244,18 +245,19 @@ def drag_window():
 
 @eel.expose
 def dlcheck():
-    if downloaded == True:
-        print("게임 파일 찾음")
-        vs = getinfo()[0]
-        print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
-        if db.getversion(os.path.join(unzippath, "db.db")) == vs:
-            print("게임 파일 최신버전임")
-            eel.print("「플레이」 버튼을 누르세요.")
-            eel.dlcomp()
-        else:
-            print("최신 버전 발견: " + vs)
-            eel.print("업데이트가 필요합니다.")
-            eel.youp
+    if isDebug == False: # Github API limit exceed 방지
+        if downloaded == True:
+            print("게임 파일 찾음")
+            vs = getinfo()[0]
+            print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
+            if db.getversion(os.path.join(unzippath, "db.db")) == vs:
+                print("게임 파일 최신버전임")
+                eel.print("「플레이」 버튼을 누르세요.")
+                eel.dlcomp()
+            else:
+                print("최신 버전 발견: " + vs)
+                eel.print("업데이트가 필요합니다.")
+                eel.youp
 
 @eel.expose
 def pexit():
