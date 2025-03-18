@@ -11,6 +11,13 @@ import webbrowser
 import platformcheck
 import db
 import customtkinter
+import sys
+
+try:
+    os.chdir(sys._MEIPASS)
+    print(sys._MEIPASS)
+except:
+    os.chdir(os.getcwd())
 
 isDebug = False
 

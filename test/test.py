@@ -1,5 +1,12 @@
 import customtkinter
-#customtkinter.FontManager.load_font("PretendardVariable.ttf")
+import os
+import sys
+try:
+    os.chdir(sys._MEIPASS)
+    print(sys._MEIPASS)
+except:
+    os.chdir(os.getcwd())
+customtkinter.FontManager.load_font("font/PretendardVariable.ttf")
 def center_window(window):
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
