@@ -14,13 +14,13 @@ import db
 platform = platformcheck.os()
 
 if platform == "Windows":
-    print("Your OS: Windows")
+    print("현재 OS: Windows")
 
 elif platform == "macOS":
-    print("Your OS: macOS")
+    print("현재 OS: macOS")
 
 else:
-    print("Your OS is not support!")
+    print("현재 OS는 지원하지 않습니다.")
     exit()
 
 username = getpass.getuser()

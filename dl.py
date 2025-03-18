@@ -7,9 +7,7 @@ import platformcheck
 import getpass
 platform = platformcheck.os()
 
-# Gogs 릴리스 URL
-GOGS_RELEASES_URL = "http://112.147.160.124:8080/Kuuhaku/Unity-Game/releases"
-BASE_URL = "http://112.147.160.124:8080"  # Gogs 서버의 도메인
+RELEASES_URL = "https://api.github.com/repos/jeong-jimin-github/Unity-Game/releases/latest"
 username = getpass.getuser()
 
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
@@ -20,61 +18,42 @@ def hide_folder_windows(folder_path):
     subprocess.run(["attrib", "+h", folder_path], shell=True)
 
 def fetch_latest_release():
-    """
-    Gogs 릴리스 페이지에서 최신 릴리스의 이름, 다운로드 URL, 그리고 변경사항을 가져옵니다.
-    """
     try:
-        # Gogs 페이지 요청
-        response = requests.get(GOGS_RELEASES_URL)
-        response.raise_for_status()
+        response = requests.get(RELEASES_URL)
 
-        # BeautifulSoup으로 HTML 파싱
-        soup = BeautifulSoup(response.content, "html.parser")
+        if response.status_code != 200:
+            print("릴리스 체크 실패")
+            
+        receive = response.json()
+        download_url = ""
+        assets = receive['assets']
+        for aa in assets:
+            if platform == "Windows":
+                if aa['name'] == "Build-Windows.zip":
+                    download_url = aa['url']
+                    continue
 
-        # 최신 릴리스 이름 찾기
-        release_tag = soup.find("span", {"class": "tag text blue"})
-        if not release_tag:
-            raise Exception("No releases found.")
-        latest_version = release_tag.text.strip()  # 릴리스 버전 (예: 0.0.5)
+            if platform == "macOS":
+                if aa['name'] == "Build-MacOS.zip":
+                    download_url = aa['url']
+                    continue
 
-        # 최신 릴리스 변경사항 (description)
-        desc_container = soup.find("div", {"class": "markdown desc"})
-        latest_description = desc_container.text.strip() if desc_container else "No description available."
-
-        # 최신 릴리스 다운로드 링크 찾기 ("Windows" 텍스트 포함) - 새로운 로직
-        download_list = soup.find_all("li")
-        download_url = None
-        if platform == "Windows":
-            for item in download_list:
-                link = item.find("a")
-                if link and "Windows" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
-                    download_url = BASE_URL + link["href"]  # 상대 경로 -> 절대 경로 변환
-                    break
-        else:
-            for item in download_list:
-                link = item.find("a")
-                if link and "macOS" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
-                    download_url = BASE_URL + link["href"]  # 상대 경로 -> 절대 경로 변환
-                    break
-
-        if not download_url:
-            raise Exception("No Windows release found.")
+        latest_version, latest_description = receive['name'], receive['body']
 
         return latest_version, download_url, latest_description
     except Exception as e:
-        print(f"Error fetching release information: {e}")
+        print(f"릴리스 체크 실패: {e}")
         return None, None, None
     
 def download():
-    # 다운로드 경로
     DOWNLOAD_FOLDER = "./temp"
     if not os.path.exists(DOWNLOAD_FOLDER):
         os.makedirs(DOWNLOAD_FOLDER)
         hide_folder_windows(DOWNLOAD_FOLDER)
-    print("Download Start")
+    print("다운로드 시작")
     latest_version, download_url, latest_description = fetch_latest_release()
 
-    filename = f"";
+    filename = ""
     if platform == "Windows":
         if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))):
             os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))
