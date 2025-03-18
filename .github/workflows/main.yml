@@ -51,7 +51,7 @@ jobs:
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
             # .app 폴더를 zip으로 압축
             cd dist
-            zip -r ../artifacts/main-macos.zip dist/main.app
+            zip -r ../artifacts/main-macos.zip ./dist/main.app
             cd ..
           fi
 
