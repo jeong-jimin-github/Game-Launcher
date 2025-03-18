@@ -11,24 +11,6 @@ import webbrowser
 import platformcheck
 import db
 import customtkinter
-import hPyT
-
-class Win(customtkinter.CTk):
-    def __init__(self):
-        super().__init__()
-        self._offsetx = 0
-        self._offsety = 0
-        super().bind("<Button-1>" ,self.clickwin)
-        super().bind("<B1-Motion>", self.dragwin)
-
-    def dragwin(self,event):
-        x = super().winfo_pointerx() - self._offsetx
-        y = super().winfo_pointery() - self._offsety
-        super().geometry(f"+{x}+{y}")
-
-    def clickwin(self,event):
-        self._offsetx = super().winfo_pointerx() - super().winfo_rootx()
-        self._offsety = super().winfo_pointery() - super().winfo_rooty()
 
 customtkinter.FontManager.load_font("PretendardVariable.ttf")
 
@@ -39,6 +21,24 @@ platform = platformcheck.os()
 
 if platform == "Windows":
     print("현재 OS: Windows")
+    import hPyT
+
+    class Win(customtkinter.CTk):
+        def __init__(self):
+            super().__init__()
+            self._offsetx = 0
+            self._offsety = 0
+            super().bind("<Button-1>" ,self.clickwin)
+            super().bind("<B1-Motion>", self.dragwin)
+
+        def dragwin(self,event):
+            x = super().winfo_pointerx() - self._offsetx
+            y = super().winfo_pointery() - self._offsety
+            super().geometry(f"+{x}+{y}")
+
+        def clickwin(self,event):
+            self._offsetx = super().winfo_pointerx() - super().winfo_rootx()
+            self._offsety = super().winfo_pointery() - super().winfo_rooty()
 
 elif platform == "macOS":
     print("현재 OS: macOS")
@@ -72,34 +72,61 @@ def center_window(window):
     y = (screen_height - window.winfo_reqheight()) // 2
     window.geometry(f"+{x}+{y}")
 
-def exitalert():   
-    app = Win()
-    app.geometry("300x90")
-    center_window(app)
-    hPyT.title_bar.hide(app)
-    my_font = customtkinter.CTkFont(family="Pretendard Variable", size=15, weight='normal')
+def exitalert():
+    if platform == "Windows":
+        app = Win()
+        app.geometry("300x90")
+        center_window(app)
+        hPyT.title_bar.hide(app)
+        my_font = customtkinter.CTkFont(family="Pretendard Variable", size=15, weight='normal')
 
-    def no():
-        app.destroy()
+        def no():
+            app.destroy()
 
-    def yes():
-        # Webview의 모든 창 닫기
-        for window in webview.windows:
-            window.closed = True
-        os._exit(0)  # 프로그램 강제 종료
+        def yes():
+            # Webview의 모든 창 닫기
+            for window in webview.windows:
+                window.closed = True
+            os._exit(0)  # 프로그램 강제 종료
 
-    label = customtkinter.CTkLabel(master=app, text="다운로드가 진행중입니다.\n중단하고 나가시겠습니까?", anchor='center', font=my_font)
-    label.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+        label = customtkinter.CTkLabel(master=app, text="다운로드가 진행중입니다.\n중단하고 나가시겠습니까?", anchor='center', font=my_font)
+        label.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
 
-    button = customtkinter.CTkButton(master=app, text="아니오", command=no, font=my_font, width=70)
-    button.place(relx=0.4, rely=0.6, anchor=customtkinter.NE)
+        button = customtkinter.CTkButton(master=app, text="아니오", command=no, font=my_font, width=70)
+        button.place(relx=0.4, rely=0.6, anchor=customtkinter.NE)
 
-    button1 = customtkinter.CTkButton(master=app, text="네", command=yes, font=my_font, width=70)
-    button1.place(relx=0.6, rely=0.6, anchor=customtkinter.NW)
+        button1 = customtkinter.CTkButton(master=app, text="네", command=yes, font=my_font, width=70)
+        button1.place(relx=0.6, rely=0.6, anchor=customtkinter.NW)
 
-    app.mainloop()
+        app.mainloop()
 
-# Downloading 메시지를 출력하는 함수
+    if platform == "macOS":
+        app = customtkinter.CTk()
+        app.geometry("300x130")
+        center_window(app)
+        hPyT.title_bar.hide(app)
+        my_font = customtkinter.CTkFont(family="Pretendard Variable", size=15, weight='normal')
+
+        def no():
+            app.destroy()
+
+        def yes():
+            # Webview의 모든 창 닫기
+            for window in webview.windows:
+                window.closed = True
+            os._exit(0)  # 프로그램 강제 종료
+
+        label = customtkinter.CTkLabel(master=app, text="다운로드가 진행중입니다.\n중단하고 나가시겠습니까?", anchor='center', font=my_font)
+        label.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+
+        button = customtkinter.CTkButton(master=app, text="아니오", command=no, font=my_font, width=70)
+        button.place(relx=0.4, rely=0.6, anchor=customtkinter.NE)
+
+        button1 = customtkinter.CTkButton(master=app, text="네", command=yes, font=my_font, width=70)
+        button1.place(relx=0.6, rely=0.6, anchor=customtkinter.NW)
+
+        app.mainloop()
+
 def display_downloading_message():
     global downloading
     dots = ["", ".", "..", "..."]
