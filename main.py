@@ -118,10 +118,23 @@ def start_eel():
         print(f"Error starting Eel: {e}")
 
 
+import webview
+import platform
+
 def start_gui(scaled_width, scaled_height):
     """PyWebView 창 실행"""
+    print("Launching WebView...")
+
+    # MacOS DPI 스케일링 처리
+    if platform.system() == "Darwin":  # macOS인지 체크
+        scaling_factor = 2  # macOS 기본 Retina 디스플레이 (HiDPI 처리)
+        scaled_width = int(scaled_width * scaling_factor)
+        scaled_height = int(scaled_height * scaling_factor)
+    elif platform.system() == "Windows":
+        scaling_factor = 1.25  # 일반적인 DPI 스케일링 가정 (사용자 환경에 따라 조정)
+
     try:
-        # webview 창 생성
+        # WebView 창 생성
         window = webview.create_window(
             'My App',
             url='http://localhost:8080',
@@ -129,8 +142,6 @@ def start_gui(scaled_width, scaled_height):
             width=scaled_width,
             height=scaled_height,
         )
-
-        # WebView 시작
         webview.start(debug=False)
     except Exception as e:
         print(f"Error starting WebView: {e}")
@@ -265,6 +276,5 @@ if __name__ == '__main__':
     eel_thread.start()  # Eel 서버 시작
 
     # PyWebView를 메인 스레드에서 실행
-    viewport_height = 1000  # 고정값 또는 입력값
     time.sleep(1)  # Eel 서버가 완전히 구동될 때까지 대기 (1초)
     start_gui(946, 646)
