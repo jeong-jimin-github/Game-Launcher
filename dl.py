@@ -17,9 +17,14 @@ if platform != "Windows":
 def hide_folder_windows(folder_path):
     subprocess.run(["attrib", "+h", folder_path], shell=True)
 
-def fetch_latest_release():
+def fetch_latest_release(auth):
     try:
-        response = requests.get(RELEASES_URL)
+        if auth[0] == "":
+            global response
+            response = requests.get(RELEASES_URL)
+        else:
+            global response
+            response = requests.get(RELEASES_URL, auth=(auth[0],auth[1]))
 
         if response.status_code != 200:
             print("릴리스 체크 실패")
@@ -37,8 +42,12 @@ def fetch_latest_release():
                 if aa['name'] == "MacOS-Build.zip":
                     download_url = aa['url']
                     continue
-
-        dlurl = requests.get(download_url).json()['browser_download_url']
+        if auth[0] == "":
+            global dlurl
+            dlurl = requests.get(download_url).json()['browser_download_url']
+        else:
+            global dlurl
+            dlurl = requests.get(download_url, auth=(auth[0],auth[1])).json()['browser_download_url']
 
         latest_version, latest_description = receive['name'], receive['body']
 
@@ -47,13 +56,13 @@ def fetch_latest_release():
         print(f"릴리스 체크 실패: {e}")
         return None, None, None
     
-def download():
+def download(auth):
     DOWNLOAD_FOLDER = "./temp"
     if not os.path.exists(DOWNLOAD_FOLDER):
         os.makedirs(DOWNLOAD_FOLDER)
         hide_folder_windows(DOWNLOAD_FOLDER)
     print("다운로드 시작")
-    latest_version, download_url, latest_description = fetch_latest_release()
+    latest_version, download_url, latest_description = fetch_latest_release(auth)
 
     filename = ""
     if platform == "Windows":
@@ -75,6 +84,6 @@ def download():
 
     db.setversion(os.path.join(unzippath, "db.db"), latest_version)
 
-def getinfo():
-    version, download_url, description = fetch_latest_release()
+def getinfo(auth):
+    version, download_url, description = fetch_latest_release(auth)
     return [version, download_url, description]

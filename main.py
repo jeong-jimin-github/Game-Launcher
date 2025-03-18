@@ -12,6 +12,10 @@ import platformcheck
 import db
 import customtkinter
 import sys
+from dotenv import load_dotenv
+
+USERNAME = ""
+TOKEN = ""
 
 try:
     os.chdir(sys._MEIPASS)
@@ -20,6 +24,13 @@ except:
     os.chdir(os.getcwd())
 
 isDebug = False
+
+if os.path.exists(".env"):
+    isDebug = True
+
+    load_dotenv()
+    USERNAME = os.environ.get('USERNAME')
+    TOKEN = os.environ.get('TOKEN')
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -251,19 +262,18 @@ def drag_window():
 
 @eel.expose
 def dlcheck():
-    if isDebug == False: # Github API limit exceed 방지
-        if downloaded == True:
-            print("게임 파일 찾음")
-            vs = getinfo()[0]
-            print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
-            if db.getversion(os.path.join(unzippath, "db.db")) == vs:
-                print("게임 파일 최신버전임")
-                eel.print("「플레이」 버튼을 누르세요.")
-                eel.dlcomp()
-            else:
-                print("최신 버전 발견: " + vs)
-                eel.print("업데이트가 필요합니다.")
-                eel.youp
+    if downloaded == True:
+        print("게임 파일 찾음")
+        vs = getinfo([USERNAME, TOKEN])[0]
+        print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
+        if db.getversion(os.path.join(unzippath, "db.db")) == vs:
+            print("게임 파일 최신버전임")
+            eel.print("「플레이」 버튼을 누르세요.")
+            eel.dlcomp()
+        else:
+            print("최신 버전 발견: " + vs)
+            eel.print("업데이트가 필요합니다.")
+            eel.youp
 
 @eel.expose
 def pexit():
@@ -333,7 +343,7 @@ def dl():
             downloading_thread.start()  # 다운로드 메시지 표시 스레드 시작
 
             eel.print("다운로드 중...")
-            download()  # 다운로드 작업 수행
+            download([USERNAME, TOKEN])  # 다운로드 작업 수행
             downloading = False  # 다운로드 완료
             downloading_thread.join()  # 다운로드 메시지 스레드 종료
 
