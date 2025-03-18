@@ -27,7 +27,7 @@ jobs:
 
       - name: 실행 파일 빌드
         shell: bash
-        run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
+        run: pyinstaller --onefile --windowed --noconsole --add-data web:web --add-data font:font --icon icon.ico --upx-dir upx main.py
 
       - name: 실행 파일 이동
         shell: bash

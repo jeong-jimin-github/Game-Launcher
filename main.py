@@ -14,8 +14,6 @@ import customtkinter
 
 isDebug = False
 
-customtkinter.FontManager.load_font("PretendardVariable.ttf")
-
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
 
@@ -23,6 +21,7 @@ platform = platformcheck.os()
 
 if platform == "Windows":
     print("현재 OS: Windows")
+    customtkinter.FontManager.load_font("font/PretendardVariable.ttf")
     import hPyT
 
     class Win(customtkinter.CTk):
