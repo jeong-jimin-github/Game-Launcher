@@ -10,6 +10,30 @@ import subprocess
 import webbrowser
 import platformcheck
 import db
+import customtkinter
+import hPyT
+
+class Win(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self._offsetx = 0
+        self._offsety = 0
+        super().bind("<Button-1>" ,self.clickwin)
+        super().bind("<B1-Motion>", self.dragwin)
+
+    def dragwin(self,event):
+        x = super().winfo_pointerx() - self._offsetx
+        y = super().winfo_pointery() - self._offsety
+        super().geometry(f"+{x}+{y}")
+
+    def clickwin(self,event):
+        self._offsetx = super().winfo_pointerx() - super().winfo_rootx()
+        self._offsety = super().winfo_pointery() - super().winfo_rooty()
+
+customtkinter.FontManager.load_font("PretendardVariable.ttf")
+
+customtkinter.set_appearance_mode("System")
+customtkinter.set_default_color_theme("blue")
 
 platform = platformcheck.os()
 
@@ -38,8 +62,42 @@ if os.path.exists(unzippath) == False:
 db.init(os.path.join(unzippath, "db.db"))
 
 # dl 함수를 위한 thread-safe 플래그
-downloading = True
+downloading = False
 unarchiving = False
+
+def center_window(window):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width - window.winfo_reqwidth()) // 2
+    y = (screen_height - window.winfo_reqheight()) // 2
+    window.geometry(f"+{x}+{y}")
+
+def exitalert():   
+    app = Win()
+    app.geometry("300x90")
+    center_window(app)
+    hPyT.title_bar.hide(app)
+    my_font = customtkinter.CTkFont(family="Pretendard Variable", size=15, weight='normal')
+
+    def no():
+        app.destroy()
+
+    def yes():
+        # Webview의 모든 창 닫기
+        for window in webview.windows:
+            window.closed = True
+        os._exit(0)  # 프로그램 강제 종료
+
+    label = customtkinter.CTkLabel(master=app, text="다운로드가 진행중입니다.\n중단하고 나가시겠습니까?", anchor='center', font=my_font)
+    label.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+
+    button = customtkinter.CTkButton(master=app, text="아니오", command=no, font=my_font, width=70)
+    button.place(relx=0.4, rely=0.6, anchor=customtkinter.NE)
+
+    button1 = customtkinter.CTkButton(master=app, text="네", command=yes, font=my_font, width=70)
+    button1.place(relx=0.6, rely=0.6, anchor=customtkinter.NW)
+
+    app.mainloop()
 
 # Downloading 메시지를 출력하는 함수
 def display_downloading_message():
@@ -174,14 +232,16 @@ def dlcheck():
 
 @eel.expose
 def pexit():
-    try:
-        # Webview의 모든 창 닫기
-        for window in webview.windows:
-            window.closed = True
-        os._exit(0)  # 프로그램 강제 종료
-    except Exception as e:
-        print(f"Error encountered while trying to exit: {e}")
-        
+    if downloading == True:
+        exitalert()
+    else:
+        try:
+            # Webview의 모든 창 닫기
+            for window in webview.windows:
+                window.closed = True
+            os._exit(0)  # 프로그램 강제 종료
+        except Exception as e:
+            print(f"Error encountered while trying to exit: {e}")
 
 @eel.expose
 def play():
@@ -225,39 +285,48 @@ def play():
     
 @eel.expose
 def dl():
+    """다운로드 및 압축 해제"""
     global downloading, unarchiving
-    try:
-        # 다운로드 메시지를 시작
-        downloading_thread = threading.Thread(target=display_downloading_message)
-        downloading = True
-        downloading_thread.start()
 
-        eel.print("다운로드 중...")
-        download()  # 다운로드 작업 수행
-        downloading = False  # 다운로드 완료
-        downloading_thread.join()
+    def download_and_extract():
+        global downloading, unarchiving
 
-        # 압축 해제 메시지를 시작
-        unarchiving_thread = threading.Thread(target=display_unarchiving_message)
-        unarchiving = True
-        unarchiving_thread.start()
+        try:
+            # 다운로드 메시지를 시작
+            downloading = True
+            downloading_thread = threading.Thread(target=display_downloading_message)
+            downloading_thread.start()  # 다운로드 메시지 표시 스레드 시작
 
-        eel.print("압축 푸는 중...")
-        if platform == "Windows":
-            unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
-        else:
-            unzip('./temp/SubarashiiGame-macOS.zip')  # 압축 해제 시작   
-        eel.print("압축 풀기가 완료되었습니다.")
+            eel.print("다운로드 중...")
+            download()  # 다운로드 작업 수행
+            downloading = False  # 다운로드 완료
+            downloading_thread.join()  # 다운로드 메시지 스레드 종료
 
-        unarchiving = False
-        unarchiving_thread.join()
+            # 압축 해제 메시지를 시작
+            unarchiving = True
+            unarchiving_thread = threading.Thread(target=display_unarchiving_message)
+            unarchiving_thread.start()  # 압축 해제 메시지 표시 스레드 시작
 
-        eel.print("다운로드가 완료되었습니다.")
-        eel.dlcomp()
-    except Exception as e:
-        downloading = False
-        unarchiving = False
-        eel.print(f"에러: {e}")
+            eel.print("압축 푸는 중...")
+            if platform == "Windows":
+                unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
+            else:
+                unzip('./temp/SubarashiiGame-macOS.zip')  # 압축 해제 시작   
+            unarchiving = False
+            unarchiving_thread.join()  # 압축 해제 메시지 스레드 종료
+
+            # 다운로드 및 압축 해제 완료 메시지
+            eel.print("다운로드가 완료되었습니다.")
+            eel.dlcomp()
+
+        except Exception as e:
+            # 에러 발생 시 상태 플래그 해제 및 메시지 출력
+            downloading = False
+            unarchiving = False
+            eel.print(f"에러 발생: {e}")
+
+    # 다운로드 및 압축 해제를 별도의 스레드에서 처리
+    threading.Thread(target=download_and_extract, daemon=True).start()
 
 if __name__ == '__main__':
     print("EEL 및 Webview 시작")

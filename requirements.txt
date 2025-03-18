@@ -3,3 +3,5 @@ pywebview
 requests
 bs4
 pyinstaller
+customtkinter
+hPyT
