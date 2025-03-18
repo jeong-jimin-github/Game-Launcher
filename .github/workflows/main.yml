@@ -16,7 +16,7 @@ jobs:
     steps:
       # 1. 코드 체크아웃
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Python 환경 설정
       - name: Set up Python
@@ -38,7 +38,7 @@ jobs:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            pyinstaller --onefile --windowed --noconsole --add-data web:web --upx-dir upx main.py
+            pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico main.py
           fi
 
       # 5. 빌드 결과를 artifacts 디렉터리에 복사 및 압축 (OS 구분)
@@ -51,13 +51,13 @@ jobs:
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
             # .app 폴더를 zip으로 압축
             cd dist
-            zip -r ../artifacts/main-macos.zip main.app
+            zip -r ../artifacts/main-macos.zip ./dist/main.app
             cd ..
           fi
 
       # 6. Artifacts 업로드 (각 OS 빌드 결과)
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
           path: artifacts/
@@ -70,14 +70,14 @@ jobs:
     steps:
       # Artifacts 다운로드 (Windows)
       - name: Download Windows Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-latest-build
           path: artifacts/windows
 
       # Artifacts 다운로드 (macOS)
       - name: Download macOS Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: macos-latest-build
           path: artifacts/macos
