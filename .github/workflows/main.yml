@@ -1,4 +1,4 @@
-name: Automated Release with UPX ⭐
+name: Automated Release
 
 on:
   push:  # 모든 Push 이벤트에서 실행
@@ -41,15 +41,18 @@ jobs:
             pyinstaller --onefile --windowed --noconsole --add-data web:web --upx-dir upx main.py
           fi
 
-      # 5. 빌드 결과를 artifacts 디렉터리에 복사 (OS 구분)
-      - name: Archive Executable
-        shell: bash  # 명령어 일관성을 위해 Bash 지정
+      # 5. 빌드 결과를 artifacts 디렉터리에 복사 및 압축 (OS 구분)
+      - name: Archive and Compress Executable
+        shell: bash
         run: |
           mkdir -p artifacts
           if [ "$RUNNER_OS" = "Windows" ]; then
             mv dist/main.exe artifacts/main-windows.exe
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            mv dist/main.app artifacts/main-macos
+            # .app 폴더를 zip으로 압축
+            cd dist  # dist 폴더로 이동
+            zip -r ../artifacts/main-macos.zip main.app  # 상위 폴더의 artifacts에 압축
+            cd .. # 다시 루트 디렉토리로
           fi
 
       # 6. 자동 태그 생성 및 릴리스 생성
@@ -76,5 +79,5 @@ jobs:
             gh release create "$tag" \
               --title "MacOS Release: $version" \
               --notes "Automatically generated release for MacOS." \
-              artifacts/main-macos
+              artifacts/main-macos.zip  # 압축된 파일 업로드
           fi
