@@ -29,12 +29,12 @@ def fetch_latest_release():
         assets = receive['assets']
         for aa in assets:
             if platform == "Windows":
-                if aa['name'] == "Build-Windows.zip":
+                if aa['name'] == "Windows-Build.zip":
                     download_url = aa['url']
                     continue
 
             if platform == "macOS":
-                if aa['name'] == "Build-MacOS.zip":
+                if aa['name'] == "MacOS-Build.zip":
                     download_url = aa['url']
                     continue
 
@@ -76,3 +76,6 @@ def download():
 def getinfo():
     version, download_url, description = fetch_latest_release()
     return [version, download_url, description]
+
+
+print(fetch_latest_release())
