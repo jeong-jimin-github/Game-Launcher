@@ -1,18 +1,15 @@
 name: Automated Release
 
 on:
-  push:  # 모든 Push 이벤트에서 실행
+  push:
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    name: Build and Release Executable
-    runs-on: ubuntu-latest  # 단일 러너에서 실행 (여러 OS에서 병렬 빌드 후 단일 릴리스)
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest]  # 빌드 환경 정의
+  Windows-Build:
+    name: Windows Build
+    runs-on: windows-latest
     steps:
       # 1. 코드 체크아웃
       - name: Checkout repository
@@ -30,56 +27,78 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. PyInstaller로 실행 파일 빌드 (OS 구분)
+      # 4. PyInstaller로 실행 파일 빌드
       - name: Build Executable
         shell: bash
-        run: |
-          echo "Running on ${{ matrix.os }}"
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico main.py
-          fi
+        run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico --upx-dir upx main.py
 
-      # 5. 빌드 결과를 artifacts 디렉터리에 복사 및 압축 (OS 구분)
+      # 5. 빌드 결과를 artifacts 디렉터리에 복사
       - name: Archive and Compress Executable
         shell: bash
-        run: |
-          mkdir -p artifacts
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            mv dist/main.exe artifacts/main-windows.exe
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            # .app 폴더를 zip으로 압축
-            cd dist
-            zip -r ../artifacts/main-macos.zip ./dist/main.app
-            cd ..
-          fi
+        run: move dist/main.exe artifacts/main-windows.exe
 
-      # 6. Artifacts 업로드 (각 OS 빌드 결과)
+      # 6. Artifacts 업로드
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-build
-          path: artifacts/
+          name: Windows-build
+          path: artifacts/main-windows.exe
 
-  # 릴리스 생성 (별도 job으로 분리)
+  macOS-Build:
+    name: macOS Build
+    runs-on: macos-latest
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Python 환경 설정
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. 의존성 설치
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. PyInstaller로 실행 파일 빌드
+      - name: Build Executable
+        shell: bash
+        run: pyinstaller --onefile --windowed --noconsole --add-data web:web --icon icon.ico main.py
+
+      # 5. 빌드 결과를 artifacts 디렉터리에 복사 및 압축
+      - name: Archive and Compress Executable
+        shell: bash
+        run: zip -j artifacts/main-macos.zip dist/*
+
+      # 6. Artifacts 업로드
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-build
+          path: artifacts/main-macos.zip
+
+  # 릴리스 생성
   create-release:
     name: Create Release
-    needs: build-and-release  # 이전 빌드 작업 완료 후 실행
+    needs: ['Windows-Build', 'macOS-Build']
     runs-on: ubuntu-latest
     steps:
       # Artifacts 다운로드 (Windows)
       - name: Download Windows Artifact
         uses: actions/download-artifact@v4
         with:
-          name: windows-latest-build
+          name: Windows-build
           path: artifacts/windows
 
       # Artifacts 다운로드 (macOS)
       - name: Download macOS Artifact
         uses: actions/download-artifact@v4
         with:
-          name: macos-latest-build
+          name: macOS-build
           path: artifacts/macos
 
       # 7. 자동 태그 생성 및 릴리스 생성
