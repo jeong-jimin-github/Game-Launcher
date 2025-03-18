@@ -79,37 +79,28 @@ jobs:
     needs: ['Windows-Build', 'macOS-Build']
     runs-on: ubuntu-latest
     steps:
-      # 첨부파일 다운로드 (Windows)
       - name: 첨부파일 다운로드 (Windows)
         uses: actions/download-artifact@v4
         with:
           name: Windows-build
           path: artifacts/windows
 
-      # 첨부파일 다운로드 (macOS)
       - name: 첨부파일 다운로드 (macOS)
         uses: actions/download-artifact@v4
         with:
           name: macOS-build
           path: artifacts/macos
 
-      # 7. 자동 태그 생성 및 릴리스 생성
-      - name: 자동 태그 생성 및 릴리스 생성
+      - name: 릴리스 생성
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/main-windows.exe
+            artifacts/main-macos.zip
+          tag_name: v1.0.${{ github.run_number }}
+          release_name: "Release v1.0.${{ github.run_number }}"
+          body: "자동 생성된 Windows 및 MacOS 빌드"
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          # 현재 시간 기반 태그 생성
-          version=$(date +%Y%m%d-%H%M%S)
-          tag="v$version"
-
-          # 태그 푸시
-          git tag $tag
-          git push origin $tag
-
-          # Release 생성 (Windows 및 macOS 파일 모두 업로드)
-          gh release create "$tag" \
-            --title "Release: $version" \
-            --notes "Automatically generated release for Windows and macOS." \
-            artifacts/windows/main-windows.exe \
-            artifacts/macos/main-macos.zip
