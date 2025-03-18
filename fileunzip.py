@@ -4,9 +4,11 @@ import shutil
 import platformcheck
 import subprocess
 
+platform = platformcheck.os()
+
 username = getpass.getuser()
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
-if platformcheck.os() != "Windows":
+if platform != "Windows":
     unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 def remove_except(directory, exclude_files):
@@ -39,7 +41,7 @@ def unzip(path):
         os.makedirs(unzippath, exist_ok=True)
 
         # 압축 해제
-        if platformcheck.os() == "Windows":
+        if platform == "Windows":
             shutil.unpack_archive(path, unzippath, 'zip')
         else:
             subprocess.run(['unzip', path, '-d', unzippath], check=True)

@@ -5,6 +5,7 @@ import subprocess
 import db
 import platformcheck
 import getpass
+platform = platformcheck.os()
 
 # Gogs 릴리스 URL
 GOGS_RELEASES_URL = "http://112.147.160.124:8080/Kuuhaku/Unity-Game/releases"
@@ -12,7 +13,7 @@ BASE_URL = "http://112.147.160.124:8080"  # Gogs 서버의 도메인
 username = getpass.getuser()
 
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
-if platformcheck.os() != "Windows":
+if platform != "Windows":
     unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 def hide_folder_windows(folder_path):
@@ -43,7 +44,7 @@ def fetch_latest_release():
         # 최신 릴리스 다운로드 링크 찾기 ("Windows" 텍스트 포함) - 새로운 로직
         download_list = soup.find_all("li")
         download_url = None
-        if platformcheck.os() == "Windows":
+        if platform == "Windows":
             for item in download_list:
                 link = item.find("a")
                 if link and "Windows" in link.text:  # 파일명이 "Windows"를 포함하는지 확인
@@ -74,7 +75,7 @@ def download():
     latest_version, download_url, latest_description = fetch_latest_release()
 
     filename = f"";
-    if platformcheck.os() == "Windows":
+    if platform == "Windows":
         if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))):
             os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))
         filename = f"SubarashiiGame-Windows.zip";

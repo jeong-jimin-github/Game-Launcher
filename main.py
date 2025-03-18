@@ -11,10 +11,12 @@ import webbrowser
 import platformcheck
 import db
 
-if platformcheck.os() == "Windows":
+platform = platformcheck.os()
+
+if platform == "Windows":
     print("Your OS: Windows")
 
-elif platformcheck.os() == "macOS":
+elif platform == "macOS":
     print("Your OS: macOS")
 
 else:
@@ -24,7 +26,7 @@ else:
 username = getpass.getuser()
 unzippath = os.path.join("C:\\Users", username, "SubarashiiGame")
 
-if platformcheck.os() != "Windows":
+if platform != "Windows":
     unzippath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SubarashiiGame")
 
 print(unzippath)
@@ -100,7 +102,7 @@ def check_for_mac_files(folder_path):
         print(f"An error occurred: {e}")
         return False
     
-if platformcheck.os() == "Windows":
+if platform == "Windows":
     if check_for_exe_files(unzippath) != False:
         downloaded = True
 
@@ -121,18 +123,13 @@ def start_gui(scaled_width, scaled_height):
     """PyWebView 창 실행"""
     print("Launching WebView...")
 
-    # MacOS DPI 스케일링 처리
-    if platformcheck.os() == "macOS":
-        # 28, 46
-        scaled_height = scaled_height - 28
-        scaled_height = scaled_width - 46
-
     try:
         # WebView 창 생성
         window = webview.create_window(
             'Launcher',
             url='http://localhost:8080',
             frameless=True,
+            resizable=False,
             width=scaled_width,
             height=scaled_height,
         )
@@ -197,7 +194,7 @@ def play():
 
         file = check_for_exe_files(unzippath)
 
-        if platformcheck.os() != "Windows":
+        if platform != "Windows":
             file = check_for_mac_files(unzippath)
         if not file:
             print("No executable file found.")
@@ -206,7 +203,7 @@ def play():
         print(f"Launching game: {file}")
         
         # EXE 파일 실행 및 대기
-        if platformcheck.os() == "Windows":
+        if platform == "Windows":
             process = subprocess.Popen(f'"{unzippath}\\{file}"', shell=True)  # EXE 파일 실행
         
             process.wait()  # 게임 프로세스가 종료될 때까지 대기
@@ -246,7 +243,7 @@ def dl():
         unarchiving_thread.start()
 
         eel.print("압축 푸는 중...")
-        if platformcheck.os() == "Windows":
+        if platform == "Windows":
             unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
         else:
             unzip('./temp/SubarashiiGame-macOS.zip')  # 압축 해제 시작   
@@ -271,5 +268,8 @@ if __name__ == '__main__':
 
     # PyWebView를 메인 스레드에서 실행
     time.sleep(1)  # Eel 서버가 완전히 구동될 때까지 대기 (1초)
-    start_gui(946, 646)
-    # 28, 46
+    if platform == "Windows":
+        start_gui(946, 646)
+
+    if platform == "macOS":
+        start_gui(928, 600)

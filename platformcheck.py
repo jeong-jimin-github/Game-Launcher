@@ -2,7 +2,7 @@ import platform
 
 def os():
     try:
-        platformall = platform.platform()
-        return platformall.split("-")[0]
+        platformall = str(platform.platform()).split("-")[0]
+        return platformall
     except:
         print("Platform Check Error")
