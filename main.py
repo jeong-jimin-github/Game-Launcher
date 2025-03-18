@@ -117,20 +117,16 @@ def start_eel():
     except Exception as e:
         print(f"Error starting Eel: {e}")
 
-
-import webview
-import platform
-
 def start_gui(scaled_width, scaled_height):
     """PyWebView 창 실행"""
     print("Launching WebView...")
 
     # MacOS DPI 스케일링 처리
-    if platform.system() == "Darwin":  # macOS인지 체크
+    if platformcheck.os() == "macOS":
         scaling_factor = 2  # macOS 기본 Retina 디스플레이 (HiDPI 처리)
         scaled_width = int(scaled_width * scaling_factor)
         scaled_height = int(scaled_height * scaling_factor)
-    elif platform.system() == "Windows":
+    elif platformcheck.os() == "Windows":
         scaling_factor = 1.25  # 일반적인 DPI 스케일링 가정 (사용자 환경에 따라 조정)
 
     try:
