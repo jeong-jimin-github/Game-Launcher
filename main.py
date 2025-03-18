@@ -123,16 +123,14 @@ def start_gui(scaled_width, scaled_height):
 
     # MacOS DPI 스케일링 처리
     if platformcheck.os() == "macOS":
-        scaling_factor = 2  # macOS 기본 Retina 디스플레이 (HiDPI 처리)
-        scaled_width = int(scaled_width * scaling_factor)
-        scaled_height = int(scaled_height * scaling_factor)
-    elif platformcheck.os() == "Windows":
-        scaling_factor = 1.25  # 일반적인 DPI 스케일링 가정 (사용자 환경에 따라 조정)
+        # 28, 46
+        scaled_height = scaled_height - 28
+        scaled_height = scaled_width - 46
 
     try:
         # WebView 창 생성
         window = webview.create_window(
-            'My App',
+            'Launcher',
             url='http://localhost:8080',
             frameless=True,
             width=scaled_width,
@@ -274,3 +272,4 @@ if __name__ == '__main__':
     # PyWebView를 메인 스레드에서 실행
     time.sleep(1)  # Eel 서버가 완전히 구동될 때까지 대기 (1초)
     start_gui(946, 646)
+    # 28, 46
