@@ -57,7 +57,7 @@ jobs:
 
       # 6. Artifacts 업로드 (각 OS 빌드 결과)
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
           path: artifacts/
@@ -70,14 +70,14 @@ jobs:
     steps:
       # Artifacts 다운로드 (Windows)
       - name: Download Windows Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-latest-build
           path: artifacts/windows
 
       # Artifacts 다운로드 (macOS)
       - name: Download macOS Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: macos-latest-build
           path: artifacts/macos
