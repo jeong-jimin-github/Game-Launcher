@@ -19,11 +19,10 @@ def hide_folder_windows(folder_path):
 
 def fetch_latest_release(auth):
     try:
+        response = None
         if auth[0] == "":
-            global response
             response = requests.get(RELEASES_URL)
         else:
-            global response
             response = requests.get(RELEASES_URL, auth=(auth[0],auth[1]))
 
         if response.status_code != 200:
@@ -42,11 +41,11 @@ def fetch_latest_release(auth):
                 if aa['name'] == "MacOS-Build.zip":
                     download_url = aa['url']
                     continue
+        dlurl = ""
+
         if auth[0] == "":
-            global dlurl
             dlurl = requests.get(download_url).json()['browser_download_url']
         else:
-            global dlurl
             dlurl = requests.get(download_url, auth=(auth[0],auth[1])).json()['browser_download_url']
 
         latest_version, latest_description = receive['name'], receive['body']

@@ -119,6 +119,28 @@ def exitalert():
 
         app.mainloop()
 
+def apialert():
+    if platform == "Windows":
+        app = Win()
+        app.geometry("300x90")
+        center_window(app)
+        hPyT.title_bar.hide(app)
+        my_font = customtkinter.CTkFont(family="Pretendard Variable", size=15, weight='normal')
+
+        def yes():
+            # Webview의 모든 창 닫기
+            for window in webview.windows:
+                window.closed = True
+            os._exit(0)  # 프로그램 강제 종료
+
+        label = customtkinter.CTkLabel(master=app, text="요청 할당량이 상한을 초과했습니다.\n1시간 후에 다시 시도해 주십시오.", anchor='center', font=my_font)
+        label.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+
+        button1 = customtkinter.CTkButton(master=app, text="확인", command=yes, font=my_font, width=70)
+        button1.place(relx=0.5, rely=0.6, anchor=customtkinter.CENTER)
+
+        app.mainloop()
+
     if platform == "macOS":
         app = customtkinter.CTk()
         app.geometry("300x130")
@@ -265,15 +287,18 @@ def dlcheck():
     if downloaded == True:
         print("게임 파일 찾음")
         vs = getinfo([USERNAME, TOKEN])[0]
-        print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
-        if db.getversion(os.path.join(unzippath, "db.db")) == vs:
-            print("게임 파일 최신버전임")
-            eel.print("「플레이」 버튼을 누르세요.")
-            eel.dlcomp()
+        if vs == None:
+            apialert()
         else:
-            print("최신 버전 발견: " + vs)
-            eel.print("업데이트가 필요합니다.")
-            eel.youp
+            print("현재 게임 버전: " + db.getversion(os.path.join(unzippath, "db.db")))
+            if db.getversion(os.path.join(unzippath, "db.db")) == vs:
+                print("게임 파일 최신버전임")
+                eel.print("「플레이」 버튼을 누르세요.")
+                eel.dlcomp()
+            else:
+                print("최신 버전 발견: " + vs)
+                eel.print("업데이트가 필요합니다.")
+                eel.youp
 
 @eel.expose
 def pexit():
