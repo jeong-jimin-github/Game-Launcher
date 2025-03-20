@@ -37,6 +37,16 @@
     -webkit-backdrop-filter: blur(30px) brightness(100%);
     opacity: 0.5;
   }
+
+  .planet-of-lana .rectangle-i .fill {
+    position: absolute;
+    width: 0; /* 초기값 */
+    height: 100%;
+    border-radius: 5px;
+    background-color: #ffcc00; /* 완전한 노란색 */
+    transition: width 0.3s ease-in-out; /* 부드러운 애니메이션 */
+  }
+  
   
   .planet-of-lana .overlap-wrapper {
     background-color: #fdfdfd;
@@ -195,12 +205,13 @@
     height: 93px;
     top: 0;
     left: 0;
-    background-color: #ffcc00;
+    background-color: rgba(255, 204, 0, 0.5); /* 반투명 배경 */
     border-radius: 5px;
     backdrop-filter: blur(30px) brightness(100%);
     -webkit-backdrop-filter: blur(30px) brightness(100%);
-    opacity: 0.5;
+    overflow: hidden; /* 내부 요소가 벗어나지 않도록 설정 */
   }
+
   
   .planet-of-lana .text-wrapper-3 {
     position: absolute;

@@ -55,31 +55,33 @@ def fetch_latest_release(auth):
         print(f"릴리스 체크 실패: {e}")
         return None, None, None
     
-def download(auth):
+def download(auth, progress_callback=None):
     DOWNLOAD_FOLDER = "./temp"
     if not os.path.exists(DOWNLOAD_FOLDER):
         os.makedirs(DOWNLOAD_FOLDER)
         hide_folder_windows(DOWNLOAD_FOLDER)
+    
     print("다운로드 시작")
     latest_version, download_url, latest_description = fetch_latest_release(auth)
 
-    filename = ""
-    if platform == "Windows":
-        if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))):
-            os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-Windows.zip"))
-        filename = f"SubarashiiGame-Windows.zip";
-    else:
-        if(os.path.exists(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-macOS.zip"))):
-            os.remove(os.path.join(DOWNLOAD_FOLDER, "SubarashiiGame-macOS.zip"))
-        filename = f"SubarashiiGame-macOS.zip";
-    
-    # 파일 다운로드 및 저장
+    filename = "SubarashiiGame-Windows.zip" if platform == "Windows" else "SubarashiiGame-macOS.zip"
     file_path = os.path.join(DOWNLOAD_FOLDER, filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
     with requests.get(download_url, stream=True) as file_response:
         file_response.raise_for_status()
+        total_size = int(file_response.headers.get("content-length", 0))
+        downloaded_size = 0
+
         with open(file_path, "wb") as f:
             for chunk in file_response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                if chunk:
+                    f.write(chunk)
+                    downloaded_size += len(chunk)
+                    if total_size > 0 and progress_callback:
+                        progress_callback(downloaded_size, total_size)
 
     db.setversion(os.path.join(unzippath, "db.db"), latest_version)
 

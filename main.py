@@ -1,8 +1,8 @@
 import eel
-from dl import download, getinfo
+import dl
 import threading
 import time
-from fileunzip import unzip
+import fileunzip
 import getpass
 import os
 import webview
@@ -14,7 +14,7 @@ import customtkinter
 import sys
 from dotenv import load_dotenv
 
-USERNAME = ""
+GITHUB_USERNAME = ""
 TOKEN = ""
 
 try:
@@ -29,7 +29,7 @@ if os.path.exists(".env"):
     isDebug = True
 
     load_dotenv()
-    USERNAME = os.environ.get('USERNAME')
+    GITHUB_USERNAME = os.environ.get('USERNAME')
     TOKEN = os.environ.get('TOKEN')
 
 customtkinter.set_appearance_mode("System")
@@ -286,7 +286,7 @@ def drag_window():
 def dlcheck():
     if downloaded == True:
         print("게임 파일 찾음")
-        vs = getinfo([USERNAME, TOKEN])[0]
+        vs = dl.getinfo([GITHUB_USERNAME, TOKEN])[0]
         if vs == None:
             apialert()
         else:
@@ -352,9 +352,19 @@ def play():
     # 게임 실행을 위해 별도 스레드에서 처리
     game_thread = threading.Thread(target=run_game, daemon=True)
     game_thread.start()
-    
+
+def show_progress(downloaded, total):
+    percent = (downloaded / total) * 100
+    eel.fillRectangle(f"{percent:.2f}")
+    print(f"\r다운로드 진행률: {percent:.2f}%", end="")
+
+def show_unzip_progress(current, total):
+    percent = (current / total) * 100
+    eel.fillRectangle(f"{percent:.2f}")
+    print(f"\r압축 해제 진행률: {percent:.2f}%", end="")
+
 @eel.expose
-def dl():
+def dlstart():
     """다운로드 및 압축 해제"""
     global downloading, unarchiving
 
@@ -362,28 +372,29 @@ def dl():
         global downloading, unarchiving
 
         try:
-            # 다운로드 메시지를 시작
             downloading = True
             downloading_thread = threading.Thread(target=display_downloading_message)
             downloading_thread.start()  # 다운로드 메시지 표시 스레드 시작
 
-            eel.print("다운로드 중...")
-            download([USERNAME, TOKEN])  # 다운로드 작업 수행
-            downloading = False  # 다운로드 완료
-            downloading_thread.join()  # 다운로드 메시지 스레드 종료
+            dl.download([GITHUB_USERNAME, TOKEN], progress_callback=show_progress)
 
+            downloading = False  # 다운로드 완료 후 스레드 종료
+            downloading_thread.join()
+            print("\n다운로드 완료!")
+            eel.fillRectangle(0)
             # 압축 해제 메시지를 시작
             unarchiving = True
             unarchiving_thread = threading.Thread(target=display_unarchiving_message)
             unarchiving_thread.start()  # 압축 해제 메시지 표시 스레드 시작
 
             eel.print("압축 푸는 중...")
-            if platform == "Windows":
-                unzip('./temp/SubarashiiGame-Windows.zip')  # 압축 해제 시작
-            else:
-                unzip('./temp/SubarashiiGame-macOS.zip')  # 압축 해제 시작   
+            zip_path = "./temp/SubarashiiGame-Windows.zip" if platform == "Windows" else "./temp/SubarashiiGame-macOS.zip"
+            fileunzip.unzip(zip_path, progress_callback=show_unzip_progress)  # 압축 해제 시작
+
             unarchiving = False
-            unarchiving_thread.join()  # 압축 해제 메시지 스레드 종료
+            unarchiving_thread.join()  # 스레드 종료
+            eel.fillRectangle(0)
+            print("\n압축 해제 완료!")
 
             # 다운로드 및 압축 해제 완료 메시지
             eel.print("다운로드가 완료되었습니다.")
@@ -393,6 +404,7 @@ def dl():
             # 에러 발생 시 상태 플래그 해제 및 메시지 출력
             downloading = False
             unarchiving = False
+            print(f"에러 발생: {e}")
             eel.print(f"에러 발생: {e}")
 
     # 다운로드 및 압축 해제를 별도의 스레드에서 처리

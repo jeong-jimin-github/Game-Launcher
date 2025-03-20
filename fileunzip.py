@@ -2,7 +2,7 @@ import os
 import getpass
 import shutil
 import platformcheck
-import subprocess
+import zipfile
 
 platform = platformcheck.os()
 
@@ -26,7 +26,7 @@ def remove_except(directory, exclude_files):
             else:
                 os.remove(item_path)  # 파일 삭제
 
-def unzip(path):
+def unzip(path, progress_callback=None):
     try:
         # 압축 해제 경로 초기화
         if os.path.exists(unzippath):
@@ -40,13 +40,20 @@ def unzip(path):
                 return
         os.makedirs(unzippath, exist_ok=True)
 
-        # 압축 해제
-        if platform == "Windows":
-            shutil.unpack_archive(path, unzippath, 'zip')
-        else:
-            subprocess.run(['unzip', path, '-d', unzippath], check=True)
-        print("Unzipping completed successfully.")
+        # 파일 개수 확인
+        with zipfile.ZipFile(path, 'r') as zip_ref:
+            file_list = zip_ref.namelist()
+            total_files = len(file_list)
+
+            # 압축 해제 진행
+            for i, file in enumerate(file_list, 1):
+                zip_ref.extract(file, unzippath)
+                if progress_callback:
+                    progress_callback(i, total_files)
+
+        print("압축 해제 완료.")
         shutil.rmtree("./temp")
+
     except FileNotFoundError as fnfe:
         print(f"ERROR: File not found. {fnfe}")
     except PermissionError as pe:
