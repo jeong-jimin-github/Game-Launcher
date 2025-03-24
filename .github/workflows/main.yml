@@ -98,7 +98,6 @@ jobs:
             artifacts/windows/main-windows.exe
             artifacts/macos/main-macos.zip
           tag_name: v1.0.${{ github.run_number }}
-          release_name: "Release v1.0.${{ github.run_number }}"
           body: "자동 생성된 Windows 및 MacOS 빌드"
           draft: false
           prerelease: false

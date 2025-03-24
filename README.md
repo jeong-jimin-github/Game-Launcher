@@ -1,4 +1,8 @@
-# Game-Launcher
-Game Launcher
+# SubarashiiGame Launcher
+SubarashiiGame Launcher
 
-Windows & macOS
+
+[Download release (Windows & macOS)](https://github.com/jeong-jimin-github/Game-Launcher/releases)
+
+## Screenshots
+Preparing...
