@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   create-tag-and-release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -20,18 +20,43 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
       - name: Create and push tag
         id: tag
-        shell: bash
+        shell: pwsh
         run: |
-          TAG_NAME="auto-$(date -u +'%Y%m%d-%H%M%S')-${GITHUB_SHA::7}"
-          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          $timestamp = (Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmmss')
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          $tagName = "auto-$timestamp-$shortSha"
+          "tag_name=$tagName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git tag "$TAG_NAME" "$GITHUB_SHA"
-          git push origin "$TAG_NAME"
+          git tag "$tagName" "${{ github.sha }}"
+          git push origin "$tagName"
+
+      - name: Publish app
+        shell: pwsh
+        run: |
+          dotnet restore GameLauncherWPF.sln
+          dotnet publish GameLauncherWPF.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win-x64
+
+      - name: Create release zip
+        id: package
+        shell: pwsh
+        run: |
+          $zipName = "GameLauncherWPF-${{ steps.tag.outputs.tag_name }}-win-x64.zip"
+          $zipPath = "publish/$zipName"
+          if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force
+          }
+          Compress-Archive -Path "publish/win-x64/*" -DestinationPath $zipPath
+          "zip_path=$zipPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -41,3 +66,5 @@ jobs:
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
           make_latest: true
+          files: |
+            ${{ steps.package.outputs.zip_path }}
