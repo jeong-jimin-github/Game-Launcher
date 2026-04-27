@@ -1,62 +1,39 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-/temp/
-*.spec
-/.venv/
-# C extensions
-*.so
-/temp/
-/SubarashiiGame/
-.DS_Store
-# Distribution / packaging
+# Build output
 bin/
-build/
-develop-eggs/
-dist/
-eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
-
-# Django stuff:
-*.log
-*.pot
-
-# Sphinx documentation
-docs/_build/
-.env
-
-# C# / .NET build artifacts
 obj/
-publish/
+
+# User-specific files
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
+
+# IDE / editor
 .vs/
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Publish output
+publish/
+
+# Test and coverage
+TestResults/
+*.trx
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local settings / secrets
+*.local
+.env
+.env.*

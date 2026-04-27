@@ -1,99 +1,43 @@
-# SubarashiiGame Launcher
+# Game Launcher (WPF)
 
-SubarashiiGame Launcher – Windows & macOS game launcher for the [SubarashiiGame](https://github.com/jeong-jimin-github/Unity-Game) Unity project.
+간단한 WPF 기반 게임 런처 프로젝트입니다.
 
-[Download release (Windows & macOS)](https://github.com/jeong-jimin-github/Game-Launcher/releases)
+## 기술 스택
 
-## Screenshots
-![스크린샷 2025-03-24 오후 7 08 29](https://github.com/user-attachments/assets/205cafb7-a20c-494d-a7d8-9ed09073ba3f)
+- .NET 8
+- WPF (Windows)
+- C#
 
----
+## 프로젝트 구조
 
-## Python Launcher
+- `ViewModels/` : UI 상태 및 명령 처리
+- `Services/` : 설치, 실행, GitHub 릴리즈 조회 등 비즈니스 로직
+- `Models/` : 데이터 모델
+- `Infrastructure/` : `RelayCommand`, `AsyncRelayCommand` 등 공통 인프라
+- `Assets/` : 아이콘/이미지 등 정적 리소스
 
-The Python launcher is the original implementation and supports **Windows** and **macOS**.
+## 실행 방법
 
-### Prerequisites
-- Python 3.10+
-- Install dependencies:
-  ```bash
-  pip install -r requirements.txt
-  ```
+1. .NET SDK 8.0 이상 설치
+2. 루트 폴더에서 빌드
 
-### Run
 ```bash
-python main.py
+dotnet build GameLauncherWPF.sln
 ```
 
-### Build (stand-alone executable)
+3. 실행
+
 ```bash
-# Windows
-pyinstaller --onefile --windowed --noconsole \
-    --add-data web:web --add-data font:font \
-    --icon icon.ico --upx-dir upx main.py
-
-# macOS
-pyinstaller --onefile --windowed --noconsole \
-    --add-data web:web --icon icon.icns main.py
+dotnet run --project GameLauncherWPF.csproj
 ```
 
----
+## 배포 빌드
 
-## C# Launcher (WPF)
-
-The C# launcher is a Windows-only WPF application that provides **feature parity** with the Python launcher.
-
-### Prerequisites
-- .NET 8 SDK
-- Windows (WPF)
-
-### Build
-```powershell
-dotnet build GameLauncher.sln --configuration Release
+```bash
+dotnet publish GameLauncherWPF.csproj -c Release -r win-x64 --self-contained false
 ```
 
-### Run
-```powershell
-dotnet run --project GameLauncherWPF/GameLauncherWPF.csproj
-```
+## 참고
 
-### Run tests
-```powershell
-dotnet test GameLauncherWPF.Tests/GameLauncherWPF.Tests.csproj --verbosity normal
-```
-
-### Publish (self-contained, win-x64)
-```powershell
-dotnet publish GameLauncherWPF/GameLauncherWPF.csproj `
-    --configuration Release `
-    --runtime win-x64 `
-    --self-contained true `
-    --output publish/GameLauncherWPF
-```
-
----
-
-## Feature Parity
-
-| Feature | Python | C# (WPF) |
-|---|---|---|
-| Frameless window | ✅ (WebView 946×646) | ✅ (WPF 946×646) |
-| Korean UI | ✅ | ✅ |
-| Download game from GitHub Releases | ✅ | ✅ |
-| Download progress bar | ✅ | ✅ |
-| Extract ZIP with progress | ✅ | ✅ |
-| Version check (update detection) | ✅ (SQLite) | ✅ (version.txt) |
-| Play button (launches .exe) | ✅ | ✅ |
-| Update button (when outdated) | ✅ | ✅ |
-| Playing state (button grayed) | ✅ | ✅ |
-| Exit confirmation during download | ✅ | ✅ |
-| Discord server button | ✅ | ✅ |
-| macOS support | ✅ | ❌ (WPF is Windows-only) |
-| Background drag (frameless) | ✅ | ✅ |
-| Game folder (\`~/SubarashiiGame\`) | ✅ | ✅ |
-| Skip \`UnityCrashHandler64.exe\` | ✅ | ✅ |
-
-### Notes
-- **macOS**: The C# version is Windows-only because WPF does not run on macOS. The Python launcher continues to support both platforms.
-- **Version storage**: Python uses SQLite (`db.db`); C# uses a plain `version.txt` file in the same game folder — functionally equivalent.
-- **UI framework**: Python uses a custom HTML/CSS UI via pywebview+eel; C# uses native WPF with the same color scheme and layout.
+- 이 프로젝트는 Windows 환경(WPF)에서 동작합니다.
+- 로컬 빌드 산출물(`bin/`, `obj/`)과 IDE 설정(`.vs/`)은 `.gitignore`에 의해 추적되지 않습니다.

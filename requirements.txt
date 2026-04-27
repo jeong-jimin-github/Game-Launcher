@@ -1,7 +1,0 @@
-eel
-pywebview
-requests
-pyinstaller
-customtkinter
-hPyT
-python-dotenv
