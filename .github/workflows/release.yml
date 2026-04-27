@@ -1,0 +1,54 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore GameLauncherWPF/GameLauncherWPF.csproj
+
+      - name: Build
+        run: dotnet build GameLauncherWPF/GameLauncherWPF.csproj --configuration Release --no-restore
+
+      - name: Publish (self-contained, win-x64)
+        run: >
+          dotnet publish GameLauncherWPF/GameLauncherWPF.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output publish/GameLauncherWPF
+
+      - name: Create ZIP artifact
+        run: Compress-Archive -Path publish/GameLauncherWPF/* -DestinationPath GameLauncherWPF-win-x64.zip
+
+      - name: Generate tag name
+        id: tag
+        run: |
+          $date = Get-Date -Format "yyyy.MM.dd"
+          $tag = "v$date.${{ github.run_number }}"
+          echo "TAG=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: "Game Launcher ${{ steps.tag.outputs.TAG }}"
+          generate_release_notes: true
+          files: GameLauncherWPF-win-x64.zip
