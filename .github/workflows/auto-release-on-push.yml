@@ -44,19 +44,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet restore GameLauncherWPF.sln
-          dotnet publish GameLauncherWPF.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish/win-x64
-
-      - name: Create release zip
-        id: package
-        shell: pwsh
-        run: |
-          $zipName = "GameLauncherWPF-${{ steps.tag.outputs.tag_name }}-win-x64.zip"
-          $zipPath = "publish/$zipName"
-          if (Test-Path $zipPath) {
-            Remove-Item $zipPath -Force
-          }
-          Compress-Archive -Path "publish/win-x64/*" -DestinationPath $zipPath
-          "zip_path=$zipPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          dotnet publish GameLauncherWPF.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/win-x64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -67,4 +55,4 @@ jobs:
           generate_release_notes: true
           make_latest: true
           files: |
-            ${{ steps.package.outputs.zip_path }}
+            publish/win-x64/GameLauncherWPF.exe

@@ -34,8 +34,11 @@ dotnet run --project GameLauncherWPF.csproj
 ## 배포 빌드
 
 ```bash
-dotnet publish GameLauncherWPF.csproj -c Release -r win-x64 --self-contained false
+dotnet publish GameLauncherWPF.csproj -c Release
 ```
+
+- 결과물: `bin/Release/net8.0-windows/win-x64/publish/GameLauncherWPF.exe` (단일 파일)
+- 결과물: `bin/Release/net8.0-windows/win-x64/publish/GameLauncherWPF.exe` (실제 1개 파일로 출력)
 
 ## 참고
 
