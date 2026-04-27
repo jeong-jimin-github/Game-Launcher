@@ -22,10 +22,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore GameLauncherWPF/GameLauncherWPF.csproj
+        run: dotnet restore GameLauncher.sln
 
       - name: Build
-        run: dotnet build GameLauncherWPF/GameLauncherWPF.csproj --configuration Release --no-restore
+        run: dotnet build GameLauncher.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test GameLauncherWPF.Tests/GameLauncherWPF.Tests.csproj --configuration Release --no-build --verbosity normal
 
       - name: Publish (self-contained, win-x64)
         run: >
